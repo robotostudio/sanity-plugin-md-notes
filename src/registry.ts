@@ -28,11 +28,23 @@ export interface HelpRegistryOptions {
   files: Record<string, string>
 
   /**
-   * GitHub `owner/repo` for the "Edit on GitHub" footer link. Optional;
-   * footer link is hidden when omitted.
-   *   e.g. 'BabelStreet/sanity-babel-street'
+   * Source for the "Edit on GitHub" footer link. Optional; the footer link
+   * is hidden when this can't be resolved to a `owner/repo` pair.
+   *
+   * Accepts any of:
+   * - `'owner/repo'` shorthand
+   * - `'https://github.com/owner/repo'` (with or without `.git`)
+   * - `'git+https://github.com/owner/repo.git'`
+   * - `'git@github.com:owner/repo.git'`
+   * - `'github:owner/repo'`
+   * - `{url: string}` — the shape of `pkg.repository` in package.json
+   *
+   * Easiest setup: pass your package.json `repository` field directly:
+   *
+   *     import pkg from './package.json'
+   *     helpPlugin({ files, githubRepo: pkg.repository })
    */
-  githubRepo?: string
+  githubRepo?: string | {url?: string; type?: string} | null
 
   /**
    * Branch the GitHub link should point at. Defaults to `main`.
@@ -59,15 +71,40 @@ function parseFrontmatter(raw: string): {
   return {body, lastUpdated: lu ? lu[1] : null}
 }
 
+/**
+ * Normalises a wide range of repo identifiers into an `owner/repo` string.
+ * Returns null when nothing recognisable is found — the footer link is then
+ * suppressed instead of pointing at a broken URL.
+ */
+function parseGithubRepo(
+  input: string | {url?: string; type?: string} | null | undefined,
+): string | null {
+  if (!input) return null
+  const raw = typeof input === 'string' ? input : input.url
+  if (!raw || typeof raw !== 'string') return null
+  const cleaned = raw.trim().replace(/^git\+/, '').replace(/\.git$/, '')
+  // github:owner/repo shorthand
+  const ghShort = cleaned.match(/^github:([\w.-]+)\/([\w.-]+)$/i)
+  if (ghShort) return `${ghShort[1]}/${ghShort[2]}`
+  // any URL containing github.com — covers https://, git://, ssh://, git@host:owner/repo
+  const ghUrl = cleaned.match(/github\.com[:/]([\w.-]+)\/([\w.-]+?)(?:[/?#]|$)/i)
+  if (ghUrl) return `${ghUrl[1]}/${ghUrl[2]}`
+  // plain `owner/repo` (no scheme, no `@`, exactly one slash)
+  const plain = cleaned.match(/^([\w.-]+)\/([\w.-]+)$/)
+  if (plain && !cleaned.includes('://') && !cleaned.includes('@')) {
+    return `${plain[1]}/${plain[2]}`
+  }
+  return null
+}
+
 let registry: Record<string, HelpEntry> = {}
 let editUrlBase: string | null = null
 
 export function initHelpRegistry(options: HelpRegistryOptions): void {
   const {files, githubRepo, branch = 'main', basePath} = options
   registry = {}
-  editUrlBase = githubRepo
-    ? `https://github.com/${githubRepo}/blob/${branch}`
-    : null
+  const repo = parseGithubRepo(githubRepo)
+  editUrlBase = repo ? `https://github.com/${repo}/blob/${branch}` : null
 
   for (const [path, raw] of Object.entries(files)) {
     if (typeof raw !== 'string') continue
