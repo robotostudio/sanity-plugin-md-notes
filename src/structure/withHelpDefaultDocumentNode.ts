@@ -1,0 +1,49 @@
+import type {DefaultDocumentNodeResolver} from 'sanity/structure'
+import {HelpIcon} from '../components/HelpIcon'
+import {HelpView} from '../components/HelpView'
+import {isHelpActive} from '../schema/withHelp'
+
+/**
+ * Composes a `defaultDocumentNode` resolver that injects the Help view tab
+ * when the schema is opted in via `withHelp()` and a help.md file exists.
+ *
+ * Use in `sanity.config.ts`:
+ *
+ *   structureTool({
+ *     structure,
+ *     defaultDocumentNode: withHelpDefaultDocumentNode(),
+ *   })
+ *
+ * Or compose with your existing resolver:
+ *
+ *   structureTool({
+ *     structure,
+ *     defaultDocumentNode: withHelpDefaultDocumentNode((S, context) => {
+ *       return S.document().views([S.view.form(), S.view.component(MyPreview)])
+ *     }),
+ *   })
+ */
+export function withHelpDefaultDocumentNode(
+  base?: DefaultDocumentNodeResolver,
+): DefaultDocumentNodeResolver {
+  return (S, context) => {
+    const baseNode = base ? base(S, context) : S.document()
+    if (!baseNode) return baseNode
+    if (!isHelpActive(context.schemaType)) return baseNode
+
+    const helpView = S.view.component(HelpView).id('help').title('Help').icon(HelpIcon)
+
+    // If the base resolver declared views, append Help. Otherwise use [form, Help].
+    const builderWithViews = baseNode as unknown as {
+      getViews?: () => unknown[]
+    }
+    const existingViews =
+      typeof builderWithViews.getViews === 'function' ? builderWithViews.getViews() : null
+    if (existingViews && existingViews.length > 0) {
+      return baseNode.views([...existingViews, helpView] as Parameters<
+        typeof baseNode.views
+      >[0])
+    }
+    return baseNode.views([S.view.form(), helpView])
+  }
+}
