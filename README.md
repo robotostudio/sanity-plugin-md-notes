@@ -33,6 +33,7 @@ The plugin needs the **raw text of your `.help.md` files** passed in via the
 import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
 import {helpPlugin, withHelpDefaultDocumentNode} from 'sanity-plugin-help'
+import pkg from './package.json'
 
 const helpFiles = import.meta.glob('./schemaTypes/**/*.help.md', {
   eager: true,
@@ -45,8 +46,7 @@ export default defineConfig({
   plugins: [
     helpPlugin({
       files: helpFiles,
-      githubRepo: 'org/repo', // optional — adds an "Edit on GitHub" footer
-      branch: 'main',         // optional — defaults to 'main'
+      githubRepo: pkg.repository, // optional — adds an "Edit on GitHub" footer
     }),
     structureTool({
       structure: yourStructure,
@@ -55,6 +55,69 @@ export default defineConfig({
   ],
 })
 ```
+
+`githubRepo` accepts your `package.json` `repository` field directly (string
+or `{url}` object), or a plain `'owner/repo'` shorthand. Branch defaults to
+`'main'` — pass `branch: 'next'` etc. to override.
+
+#### Auto-detect from git remote (Vite only)
+
+If you'd rather not touch `package.json` at all, the plugin ships a Vite
+plugin that reads `.git/config` at build time and exposes the resolved
+`owner/repo` through a normal subpath import.
+
+**Standalone Sanity Studio** — register the plugin via the `vite` field in
+`sanity.cli.ts` (NOT `vite.config.ts` — `sanity dev` ignores it):
+
+```ts
+// sanity.cli.ts
+import {defineCliConfig} from 'sanity/cli'
+import {sanityHelpVite} from 'sanity-plugin-help/vite'
+
+export default defineCliConfig({
+  api: {projectId, dataset},
+  vite: (config) => ({
+    ...config,
+    plugins: [...(config.plugins ?? []), sanityHelpVite()],
+  }),
+})
+```
+
+**Raw Vite app** (rare for Sanity, but if you have a custom setup):
+
+```ts
+// vite.config.ts
+import {defineConfig} from 'vite'
+import {sanityHelpVite} from 'sanity-plugin-help/vite'
+
+export default defineConfig({
+  plugins: [sanityHelpVite()],
+})
+```
+
+```ts
+// sanity.config.ts
+import gitRepo from 'sanity-plugin-help/git-repo'
+import {helpPlugin} from 'sanity-plugin-help'
+
+helpPlugin({
+  files: helpFiles,
+  githubRepo: gitRepo, // 'owner/repo' or null — footer hides if null
+})
+```
+
+It walks up from `process.cwd()` looking for `.git/`, so monorepos work
+without configuration. Non-GitHub remotes resolve to `null` and the footer
+silently hides. Pass `sanityHelpVite({override: '...'})` to skip detection
+(useful in CI or when the local clone has a fork as origin).
+
+> `sanity-plugin-help/git-repo` is a normal subpath import — TypeScript
+> resolves its types through the package's `exports` field, no triple-slash
+> reference needed. Without `sanityHelpVite()` registered, the import safely
+> evaluates to `null` at runtime, so Webpack/Next.js consumers can either
+> ignore this path entirely or use it as a no-op fallback. To get a real
+> repo value in those environments, pass `githubRepo: pkg.repository` on
+> `helpPlugin` manually.
 
 ### Webpack / Next.js (Studio mounted in a Next.js route)
 
@@ -78,7 +141,7 @@ helpCtx.keys().forEach((k) => {
 export default defineConfig({
   // ...
   plugins: [
-    helpPlugin({files: helpFiles, githubRepo: 'org/repo', branch: 'main'}),
+    helpPlugin({files: helpFiles, githubRepo: pkg.repository}),
     structureTool({
       structure: yourStructure,
       defaultDocumentNode: withHelpDefaultDocumentNode(),
@@ -192,12 +255,71 @@ helpPlugin({
   // Required — raw markdown content keyed by file path.
   files: Record<string, string>,
 
-  // Optional — adds an "Edit on GitHub" footer link.
-  githubRepo: 'org/repo',
-  branch: 'main',                // default: 'main'
+  // Optional — adds an "Edit on GitHub" footer link. Accepts any of:
+  //   'owner/repo'                           shorthand
+  //   'https://github.com/owner/repo[.git]'  full URL
+  //   'git+https://...' / 'git@github.com:...' / 'github:owner/repo'
+  //   pkg.repository                         the package.json field, as-is
+  githubRepo: string | {url?: string},
+
+  branch: 'main',                  // default: 'main'
   basePath: 'apps/studio/schemas', // default: strips leading './' or '../'
 })
 ```
+
+## Authoring help content
+
+Help files are plain Markdown plus a `lastUpdated` frontmatter field:
+
+```md
+---
+lastUpdated: 2026-05-12
+---
+
+# Pages
+
+Helpful editor-facing markdown goes here.
+```
+
+### In-Studio navigation links (intent URLs)
+
+You can link to another document or a "create new" form from inside help
+markdown using Sanity's structure-tool **intent URLs**. The format is
+quirky — params live in a path segment, semicolon-separated, with no
+querystring:
+
+```md
+[Edit the Poster type](/structure/intent/edit/id=resourceType-poster;type=resourceType)
+
+[Add a new Topic](/structure/intent/create/type=topic)
+```
+
+Rules:
+
+- **Edit**: `/structure/intent/edit/id=<docId>;type=<schemaType>`
+- **Create**: `/structure/intent/create/type=<schemaType>`
+- **`/structure/` prefix matters.** A bare `/intent/edit/...` goes through
+  the studio-level tool picker, which scores `presentation` and `structure`
+  as a tie and resolves to whichever sorts first — usually presentation.
+  Prefixing with `/structure/` routes directly to the structure tool.
+- **Params are semicolon-separated path segments, not querystring.** Writing
+  `/intent/edit?id=...&type=...` crashes the router with
+  `intent params must be a string`.
+- **Clicking causes a full page reload** — this is a normal browser
+  navigation, not in-app SPA navigation. Reliable, but no soft-nav.
+- **Localized types**: if your project uses
+  `documentInternationalization` and filters bare templates out of
+  `newDocumentOptions`, `create/type=<localized>` lands in the new-doc
+  dialog with no template to pick. Link to a localized template instead,
+  e.g. `create/template=page-en;type=page`.
+- **Path prefix**: these examples assume the studio is mounted at `/`. If
+  the studio lives at `/studio` (Next.js mount), prefix accordingly:
+  `/studio/structure/intent/edit/...`.
+
+### Video embeds in markdown
+
+See the [Video embeds](#video-embeds) section above for supported providers.
+Paste the URL on its own line and the plugin renders an inline iframe.
 
 ## Local development (yalc)
 
