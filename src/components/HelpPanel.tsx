@@ -40,11 +40,16 @@ export function HelpPanel({entry}: {entry: HelpEntry}) {
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 4,
+                    gap: 6,
+                    lineHeight: 1,
+                    color: 'var(--card-link-fg-color)',
+                    textDecoration: 'none',
                   }}
                 >
-                  Edit on GitHub
-                  <LaunchIcon />
+                  <span style={{textDecoration: 'underline', textUnderlineOffset: 2}}>
+                    Edit on GitHub
+                  </span>
+                  <LaunchIcon style={{fontSize: '1.15em'}} />
                 </a>
               </Text>
             ) : null}
