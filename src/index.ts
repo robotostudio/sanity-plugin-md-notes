@@ -1,26 +1,18 @@
-import {definePlugin} from 'sanity'
+// Plugin entry
+export {helpPlugin, type HelpPluginConfig} from './plugin'
 
-interface MyPluginConfig {
-  /* nothing here yet */
-}
+// Schema opt-in
+export {withHelp, isHelpEnabled, isHelpActive} from './schema/withHelp'
 
-/**
- * Usage in `sanity.config.ts` (or .js)
- *
- * ```ts
- * import {defineConfig} from 'sanity'
- * import {myPlugin} from 'sanity-plugin-help'
- *
- * export default defineConfig({
- *   // ...
- *   plugins: [myPlugin()],
- * })
- * ```
- */
-export const myPlugin = definePlugin<MyPluginConfig | void>((config = {}) => {
-  // eslint-disable-next-line no-console
-  console.log('hello from sanity-plugin-help')
-  return {
-    name: 'sanity-plugin-help',
-  }
-})
+// Structure helpers
+export {helpMenuItems} from './structure/helpMenuItems'
+export {helpDocument} from './structure/helpDocument'
+export {withHelpDefaultDocumentNode} from './structure/withHelpDefaultDocumentNode'
+
+// Registry types (for consumers building their own integrations)
+export type {HelpEntry, HelpRegistryOptions} from './registry'
+
+// Components — exposed so consumers can swap or compose
+export {HelpIcon} from './components/HelpIcon'
+export {HelpPanel, HelpPanelEmpty} from './components/HelpPanel'
+export {MarkdownRenderer} from './components/MarkdownRenderer'

@@ -1,0 +1,54 @@
+import {definePlugin} from 'sanity'
+import {HelpLayout} from './components/HelpLayout'
+import {helpInspector} from './components/HelpInspector'
+import {initHelpRegistry, type HelpRegistryOptions} from './registry'
+
+export interface HelpPluginConfig extends HelpRegistryOptions {}
+
+/**
+ * Drop a `<schemaName>.help.md` next to a Sanity schema and editors get a
+ * native Help inspector + view tab in Studio.
+ *
+ * Usage in `sanity.config.ts`:
+ *
+ *   import {defineConfig} from 'sanity'
+ *   import {helpPlugin, withHelpDefaultDocumentNode} from 'sanity-plugin-help'
+ *
+ *   // Vite (most Sanity studios):
+ *   const helpFiles = import.meta.glob('./sanity/schemas/**\/*.help.md', {
+ *     eager: true, query: '?raw', import: 'default'
+ *   })
+ *
+ *   // Webpack/Next.js:
+ *   // const helpFiles = {}
+ *   // const ctx = require.context('./sanity/schemas', true, /\.help\.md$/)
+ *   // ctx.keys().forEach((k) => { helpFiles[k] = ctx(k) })
+ *
+ *   export default defineConfig({
+ *     plugins: [
+ *       helpPlugin({
+ *         files: helpFiles,
+ *         githubRepo: 'org/repo',
+ *         branch: 'main',
+ *       }),
+ *       structureTool({
+ *         structure,
+ *         defaultDocumentNode: withHelpDefaultDocumentNode(),
+ *       }),
+ *     ],
+ *   })
+ */
+export const helpPlugin = definePlugin<HelpPluginConfig>((config) => {
+  initHelpRegistry(config)
+  return {
+    name: 'sanity-plugin-help',
+    document: {
+      inspectors: (prev) => [helpInspector, ...prev],
+    },
+    studio: {
+      components: {
+        layout: HelpLayout,
+      },
+    },
+  }
+})
