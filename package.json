@@ -1,10 +1,14 @@
 {
   "name": "sanity-plugin-help",
   "version": "1.0.0",
-  "description": "For this this a temporary description",
+  "description": "Drop a `<schemaName>.help.md` next to a Sanity schema and editors get a native Help inspector + view tab in Studio.",
   "keywords": [
     "sanity",
-    "sanity-plugin"
+    "sanity-plugin",
+    "help",
+    "documentation",
+    "markdown",
+    "inspector"
   ],
   "license": "MIT",
   "author": "Sameerroboto <sameer@robotostudio.com>",
@@ -35,11 +39,15 @@
     "watch": "pkg-utils watch --strict"
   },
   "dependencies": {
-    "@sanity/incompatible-plugin": "^1.0.5"
+    "@sanity/incompatible-plugin": "^1.0.5",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@sanity/icons": "^3.7.0",
     "@sanity/pkg-utils": "^10.4.18",
     "@sanity/plugin-kit": "^4.0.20",
+    "@sanity/ui": "^3.1.11",
     "@types/react": "^19.2.14",
     "@typescript-eslint/eslint-plugin": "^8.59.3",
     "@typescript-eslint/parser": "^8.59.3",
@@ -58,8 +66,10 @@
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
-    "react": "^18",
-    "sanity": "^3"
+    "@sanity/icons": "^2 || ^3",
+    "@sanity/ui": "^1 || ^2 || ^3",
+    "react": "^18 || ^19",
+    "sanity": "^3 || ^4 || ^5"
   },
   "engines": {
     "node": ">=18"
