@@ -1,5 +1,7 @@
 import {LaunchIcon} from '@sanity/icons'
 import {Box, Card, Flex, Stack, Text} from '@sanity/ui'
+import type {ReactElement} from 'react'
+
 import {getEditUrl, type HelpEntry} from '../registry'
 import {MarkdownRenderer} from './markdown-renderer'
 
@@ -14,7 +16,7 @@ function formatDate(iso: string | null): string | null {
   })
 }
 
-export function HelpPanel({entry}: {entry: HelpEntry}) {
+export function HelpPanel({entry}: {entry: HelpEntry}): ReactElement {
   const lastUpdated = formatDate(entry.lastUpdated)
   const editUrl = getEditUrl(entry)
 
@@ -60,7 +62,7 @@ export function HelpPanel({entry}: {entry: HelpEntry}) {
   )
 }
 
-export function HelpPanelEmpty({schemaType}: {schemaType: string}) {
+export function HelpPanelEmpty({schemaType}: {schemaType: string}): ReactElement {
   return (
     <Box padding={4}>
       <Stack space={3}>

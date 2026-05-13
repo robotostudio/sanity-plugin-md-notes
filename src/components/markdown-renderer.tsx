@@ -10,16 +10,16 @@ import {
 import {Box, Card, Flex, Text} from '@sanity/ui'
 import React, {
   Children,
+  type ComponentType,
   createContext,
+  type CSSProperties,
   isValidElement,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type ComponentType,
-  type ReactNode,
 } from 'react'
 import ReactMarkdown, {type Components} from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -202,31 +202,30 @@ const ADMONITION_TYPES = new Set(['note', 'tip', 'important', 'warning', 'cautio
  *     > [!WARNING]
  *     > Renaming a published slug breaks bookmarks.
  */
+function applyAdmonitionMarker(node: MdastNode): void {
+  if (!Array.isArray(node.children)) return
+  const firstPara = node.children[0]
+  if (firstPara?.type !== 'paragraph' || !Array.isArray(firstPara.children)) return
+  const firstText = firstPara.children[0]
+  if (firstText?.type !== 'text' || typeof firstText.value !== 'string') return
+  const match = firstText.value.match(/^\[!([A-Z]+)\]\s*\n?/)
+  if (!match || !match[1]) return
+  const type = match[1].toLowerCase()
+  if (!ADMONITION_TYPES.has(type)) return
+  firstText.value = firstText.value.slice(match[0].length)
+  if (firstText.value === '' && firstPara.children.length === 1) {
+    node.children.shift()
+  }
+  node.data = node.data ?? {}
+  node.data.hProperties = node.data.hProperties ?? {}
+  node.data.hProperties['data-admonition'] = type
+}
+
 function remarkAdmonitions() {
   return (tree: MdastNode) => {
     walk(tree)
     function walk(node: MdastNode): void {
-      if (node.type === 'blockquote' && Array.isArray(node.children)) {
-        const firstPara = node.children[0]
-        if (firstPara?.type === 'paragraph' && Array.isArray(firstPara.children)) {
-          const firstText = firstPara.children[0]
-          if (firstText?.type === 'text' && typeof firstText.value === 'string') {
-            const match = firstText.value.match(/^\[!([A-Z]+)\]\s*\n?/)
-            if (match && match[1]) {
-              const type = match[1].toLowerCase()
-              if (ADMONITION_TYPES.has(type)) {
-                firstText.value = firstText.value.slice(match[0].length)
-                if (firstText.value === '' && firstPara.children.length === 1) {
-                  node.children.shift()
-                }
-                node.data = node.data ?? {}
-                node.data.hProperties = node.data.hProperties ?? {}
-                node.data.hProperties['data-admonition'] = type
-              }
-            }
-          }
-        }
-      }
+      if (node.type === 'blockquote') applyAdmonitionMarker(node)
       if (Array.isArray(node.children)) node.children.forEach(walk)
     }
   }
@@ -236,7 +235,7 @@ function remarkAdmonitions() {
 
 /** Convert a React children tree into a flat plain-text string. */
 function getTextFromChildren(children: ReactNode): string {
-  if (children == null || typeof children === 'boolean') return ''
+  if (children === null || children === undefined || typeof children === 'boolean') return ''
   if (typeof children === 'string' || typeof children === 'number') return String(children)
   if (Array.isArray(children)) return children.map(getTextFromChildren).join('')
   if (isValidElement(children)) {
@@ -290,7 +289,7 @@ function makeHeading(
   style: CSSProperties,
 ): Components[`h${typeof level}`] {
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-  return ({children}) => {
+  const Heading: Components[`h${typeof level}`] = ({children}) => {
     const text = getTextFromChildren(children)
     const slug = slugify(text)
     return (
@@ -300,6 +299,8 @@ function makeHeading(
       </Tag>
     )
   }
+  Heading.displayName = `H${level}`
+  return Heading
 }
 
 // --- Code block with title header + copy button -----------------------
@@ -415,7 +416,7 @@ function CodeBlock({children}: {children?: ReactNode}) {
           }}
         >
           <pre style={styles.pre}>
-            <InPreContext.Provider value={true}>{children}</InPreContext.Provider>
+            <InPreContext.Provider value>{children}</InPreContext.Provider>
           </pre>
         </div>
       </div>
@@ -606,6 +607,22 @@ function VideoEmbed({provider, embedUrl}: Embed) {
   )
 }
 
+// --- Inline + block <code> renderer ------------------------------------
+
+type CodeProps = {children?: ReactNode} & Record<string, unknown>
+
+function CodeRenderer({children, ...rest}: CodeProps): React.ReactElement {
+  const inPre = useContext(InPreContext)
+  if (inPre) {
+    // Inside a fenced block — render plain so the outer CodeBlock controls styling
+    const dataTitle = rest['data-title']
+    return (
+      <code data-title={typeof dataTitle === 'string' ? dataTitle : undefined}>{children}</code>
+    )
+  }
+  return <code style={styles.inlineCode}>{children}</code>
+}
+
 // --- Component map -----------------------------------------------------
 
 const components: Components = {
@@ -626,17 +643,7 @@ const components: Components = {
   ul: ({children}) => <ul style={styles.ul}>{children}</ul>,
   ol: ({children}) => <ol style={styles.ol}>{children}</ol>,
   li: ({children}) => <li style={styles.li}>{children}</li>,
-  code: ({children, ...rest}) => {
-    const inPre = useContext(InPreContext)
-    if (inPre) {
-      // Inside a fenced block — render plain so the outer CodeBlock controls styling
-      const dataTitle = (rest as Record<string, unknown>)['data-title']
-      return (
-        <code data-title={typeof dataTitle === 'string' ? dataTitle : undefined}>{children}</code>
-      )
-    }
-    return <code style={styles.inlineCode}>{children}</code>
-  },
+  code: (props) => <CodeRenderer {...props} />,
   pre: ({children}) => <CodeBlock>{children}</CodeBlock>,
   a: ({href, children}) => {
     const isExternal = !!href && /^https?:\/\//i.test(href)
@@ -702,11 +709,11 @@ const components: Components = {
  * mounts, this effect fires, and the panel lands pre-scrolled to the
  * targeted section.
  */
-function useHashScroll(content: string) {
+function useHashScroll(content: string): void {
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return undefined
     const rawHash = window.location.hash.slice(1)
-    if (!rawHash) return
+    if (!rawHash) return undefined
     let hash: string
     try {
       hash = decodeURIComponent(rawHash)
@@ -722,7 +729,7 @@ function useHashScroll(content: string) {
   }, [content])
 }
 
-export function MarkdownRenderer({content}: {content: string}) {
+export function MarkdownRenderer({content}: {content: string}): React.ReactElement {
   useHashScroll(content)
   return (
     <div className="help-md">

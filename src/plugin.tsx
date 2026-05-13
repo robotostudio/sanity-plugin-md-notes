@@ -1,9 +1,10 @@
 import {definePlugin} from 'sanity'
-import {HelpLayout} from './components/help-layout'
-import {helpInspector} from './components/help-inspector'
-import {initHelpRegistry, type HelpRegistryOptions} from './registry'
 
-export interface HelpPluginConfig extends HelpRegistryOptions {}
+import {helpInspector} from './components/help-inspector'
+import {HelpLayout} from './components/help-layout'
+import {type HelpRegistryOptions, initHelpRegistry} from './registry'
+
+export type HelpPluginConfig = HelpRegistryOptions
 
 /**
  * Drop a `<schemaName>.help.md` next to a Sanity schema and editors get a

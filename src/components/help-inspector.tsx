@@ -1,6 +1,7 @@
 import {defineDocumentInspector, type DocumentInspectorProps} from 'sanity'
-import {isHelpActive} from '../schema/with-help'
+
 import {getHelp} from '../registry'
+import {isHelpActive} from '../schema/with-help'
 import {HelpIcon} from './help-icon'
 import {HelpPanel, HelpPanelEmpty} from './help-panel'
 

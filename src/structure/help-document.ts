@@ -1,3 +1,5 @@
+import type {DocumentBuilder, StructureBuilder} from 'sanity/structure'
+
 import {HelpIcon} from '../components/help-icon'
 import {HelpView} from '../components/help-view'
 import {isHelpActive} from '../schema/with-help'
@@ -9,7 +11,12 @@ import {isHelpActive} from '../schema/with-help'
  *
  *   helpDocument(S, 'not-found-page', 'not-found-page-en', 'English 404 Page')
  */
-export function helpDocument(S: any, schemaType: string, documentId: string, title?: string) {
+export function helpDocument(
+  S: StructureBuilder,
+  schemaType: string,
+  documentId: string,
+  title?: string,
+): DocumentBuilder {
   let doc = S.document().schemaType(schemaType).documentId(documentId)
   if (title) doc = doc.title(title)
   if (isHelpActive(schemaType)) {

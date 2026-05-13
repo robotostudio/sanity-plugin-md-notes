@@ -1,4 +1,5 @@
 import type {DefaultDocumentNodeResolver} from 'sanity/structure'
+
 import {HelpIcon} from '../components/help-icon'
 import {HelpView} from '../components/help-view'
 import {isHelpActive} from '../schema/with-help'

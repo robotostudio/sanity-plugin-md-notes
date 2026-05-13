@@ -1,10 +1,11 @@
 import {Dialog} from '@sanity/ui'
-import {type ReactNode, useEffect, useState} from 'react'
-import {getHelp} from '../registry'
-import {HelpPanel, HelpPanelEmpty} from './help-panel'
-import {closeHelpDialog, subscribeHelpDialog} from './help-dialog-store'
+import {type ReactElement, type ReactNode, useEffect, useState} from 'react'
 
-export function HelpDialogProvider({children}: {children: ReactNode}) {
+import {getHelp} from '../registry'
+import {closeHelpDialog, subscribeHelpDialog} from './help-dialog-store'
+import {HelpPanel, HelpPanelEmpty} from './help-panel'
+
+export function HelpDialogProvider({children}: {children: ReactNode}): ReactElement {
   const [schemaType, setSchemaType] = useState<string | null>(null)
 
   useEffect(() => subscribeHelpDialog(setSchemaType), [])

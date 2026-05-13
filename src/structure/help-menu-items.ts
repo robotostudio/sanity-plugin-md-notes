@@ -1,4 +1,11 @@
-import {getOrderingMenuItemsForSchemaType} from 'sanity/structure'
+import {
+  getOrderingMenuItemsForSchemaType,
+  type MenuItem,
+  type MenuItemBuilder,
+  type StructureBuilder,
+  type StructureContext,
+} from 'sanity/structure'
+
 import {openHelpDialog} from '../components/help-dialog-store'
 import {HelpIcon} from '../components/help-icon'
 import {isHelpActive} from '../schema/with-help'
@@ -23,17 +30,21 @@ import {isHelpActive} from '../schema/with-help'
  *     S.orderingMenuItem({name: 'foo', title: 'Foo', by: [...]}),
  *   ])
  */
-export function helpMenuItems(S: any, schemaType: string, context?: {schema: unknown}): any[] {
+export function helpMenuItems(
+  S: StructureBuilder,
+  schemaType: string,
+  context?: StructureContext,
+): (MenuItem | MenuItemBuilder)[] {
   if (!isHelpActive(schemaType)) {
-    return context ? getOrderingMenuItemsForSchemaType(context as never, schemaType) : []
+    return context ? getOrderingMenuItemsForSchemaType(context, schemaType) : []
   }
   const helpItem = S.menuItem()
-    .title('Help')
+   .title('Help')
     .icon(HelpIcon)
     // Distinct group so Sanity renders a visual separator between Help and
     // any sort/other items that follow in `.menuItems([...])`.
     .group('help')
     .action(() => openHelpDialog(schemaType))
   if (!context) return [helpItem]
-  return [helpItem, ...getOrderingMenuItemsForSchemaType(context as never, schemaType)]
+  return [helpItem, ...getOrderingMenuItemsForSchemaType(context, schemaType)]
 }

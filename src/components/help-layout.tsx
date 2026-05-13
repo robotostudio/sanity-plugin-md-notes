@@ -1,4 +1,6 @@
+import type {ReactElement} from 'react'
 import type {LayoutProps} from 'sanity'
+
 import {HelpDialogProvider} from './help-dialog-provider'
 
 /**
@@ -7,6 +9,6 @@ import {HelpDialogProvider} from './help-dialog-provider'
  *
  * Wired automatically by `helpPlugin()` via `studio.components.layout`.
  */
-export function HelpLayout(props: LayoutProps) {
+export function HelpLayout(props: LayoutProps): ReactElement {
   return <HelpDialogProvider>{props.renderDefault(props)}</HelpDialogProvider>
 }

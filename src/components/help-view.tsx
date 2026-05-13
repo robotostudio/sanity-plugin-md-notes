@@ -1,4 +1,5 @@
 import type {UserViewComponent} from 'sanity/structure'
+
 import {getHelp} from '../registry'
 import {HelpPanel, HelpPanelEmpty} from './help-panel'
 
