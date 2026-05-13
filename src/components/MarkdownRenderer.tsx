@@ -507,16 +507,19 @@ const videoProviders: VideoProvider[] = [
   {
     name: 'YouTube',
     toEmbed: (url) => {
+      // `youtube-nocookie.com` is YouTube's privacy-enhanced embed host and is
+      // generally more permissive for embeds on third-party domains — it skips
+      // some referrer-based checks that `youtube.com/embed` enforces.
       const watch = url.match(
         /^https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?(?:[^#]*&)?v=([\w-]{6,})/i,
       )
-      if (watch) return `https://www.youtube.com/embed/${watch[1]}`
+      if (watch) return `https://www.youtube-nocookie.com/embed/${watch[1]}`
       const short = url.match(/^https?:\/\/youtu\.be\/([\w-]{6,})/i)
-      if (short) return `https://www.youtube.com/embed/${short[1]}`
-      const embed = url.match(/^https?:\/\/(?:www\.)?youtube\.com\/embed\/([\w-]{6,})/i)
-      if (embed) return `https://www.youtube.com/embed/${embed[1]}`
+      if (short) return `https://www.youtube-nocookie.com/embed/${short[1]}`
+      const embed = url.match(/^https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([\w-]{6,})/i)
+      if (embed) return `https://www.youtube-nocookie.com/embed/${embed[1]}`
       const shorts = url.match(/^https?:\/\/(?:www\.)?youtube\.com\/shorts\/([\w-]{6,})/i)
-      if (shorts) return `https://www.youtube.com/embed/${shorts[1]}`
+      if (shorts) return `https://www.youtube-nocookie.com/embed/${shorts[1]}`
       return null
     },
   },
@@ -588,8 +591,13 @@ function VideoEmbed({provider, embedUrl}: Embed) {
     >
       <iframe
         src={embedUrl}
-        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
         allowFullScreen
+        // YouTube validates embeds via the Referer header. Sanity Studio's
+        // default referrer policy can strip it, which produces "Error 153".
+        // Setting `origin` sends just the host (no path), enough for YouTube
+        // and most other providers, but doesn't leak the in-studio URL.
+        referrerPolicy="origin"
         title={`${provider} video`}
         style={{
           position: 'absolute',
