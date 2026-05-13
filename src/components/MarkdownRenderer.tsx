@@ -1,11 +1,10 @@
 import {
-  AsteriskIcon,
+  BellIcon,
   BulbOutlineIcon,
   CheckmarkIcon,
   CopyIcon,
   DocumentIcon,
   ErrorOutlineIcon,
-  InfoOutlineIcon,
   WarningOutlineIcon,
 } from '@sanity/icons'
 import {Box, Card, Flex, Text} from '@sanity/ui'
@@ -264,6 +263,11 @@ function HeadingAnchor({slug}: {slug: string}) {
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (event.metaKey || event.ctrlKey || event.shiftKey) return
       event.preventDefault()
+      // Update URL hash so the link is copy-shareable, but use replaceState to
+      // avoid spamming the back-button history with anchor clicks.
+      const url = new URL(window.location.href)
+      url.hash = slug
+      window.history.replaceState(null, '', url.toString())
       const target = document.getElementById(slug)
       if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'})
     },
@@ -431,13 +435,13 @@ const ADMONITIONS: Record<
   AdmonitionType,
   {
     label: string
-    icon: ComponentType
+    icon: ComponentType | null
     tone: 'primary' | 'positive' | 'caution' | 'critical'
   }
 > = {
-  note: {label: 'Note', icon: InfoOutlineIcon, tone: 'primary'},
+  note: {label: 'Note', icon: null, tone: 'primary'},
   tip: {label: 'Tip', icon: BulbOutlineIcon, tone: 'positive'},
-  important: {label: 'Important', icon: AsteriskIcon, tone: 'primary'},
+  important: {label: 'Important', icon: BellIcon, tone: 'primary'},
   warning: {label: 'Warning', icon: WarningOutlineIcon, tone: 'caution'},
   caution: {label: 'Caution', icon: ErrorOutlineIcon, tone: 'critical'},
 }
@@ -445,23 +449,42 @@ const ADMONITIONS: Record<
 function Admonition({type, children}: {type: AdmonitionType; children?: ReactNode}) {
   const config = ADMONITIONS[type]
   const Icon = config.icon
+  const body = (
+    <div className="help-md-admonition-body" style={{flex: 1, minWidth: 0}}>
+      {children}
+    </div>
+  )
   return (
     <Card
-      radius={2}
-      paddingX={3}
-      paddingY={3}
+      radius={3}
+      padding={3}
       tone={config.tone}
+      role="note"
+      aria-label={Icon ? undefined : config.label}
       style={{margin: '0 0 1rem'}}
     >
-      <Flex align="center" gap={2} marginBottom={2}>
-        <Text size={1} weight="semibold" style={{lineHeight: 1}}>
-          <Icon />
-        </Text>
-        <Text size={1} weight="semibold">
-          {config.label}
-        </Text>
-      </Flex>
-      <div className="help-md-admonition-body">{children}</div>
+      {Icon ? (
+        <Flex align="flex-start" gap={3}>
+          <span
+            role="img"
+            aria-label={config.label}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              flexShrink: 0,
+              fontSize: '20px',
+              lineHeight: 1,
+              marginTop: '2px',
+              color: 'inherit',
+            }}
+          >
+            <Icon />
+          </span>
+          {body}
+        </Flex>
+      ) : (
+        body
+      )}
     </Card>
   )
 }
@@ -668,7 +691,35 @@ const components: Components = {
   td: ({children}) => <td style={styles.td}>{children}</td>,
 }
 
+/**
+ * Read `window.location.hash` after content renders and scroll to a matching
+ * heading. Handles deep-links pasted into a fresh tab: Sanity's structure
+ * tool restores `?inspect=help` from the URL on its own, the help panel
+ * mounts, this effect fires, and the panel lands pre-scrolled to the
+ * targeted section.
+ */
+function useHashScroll(content: string) {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const rawHash = window.location.hash.slice(1)
+    if (!rawHash) return
+    let hash: string
+    try {
+      hash = decodeURIComponent(rawHash)
+    } catch {
+      hash = rawHash
+    }
+    // Defer so react-markdown has flushed the heading IDs into the DOM.
+    const handle = window.setTimeout(() => {
+      const target = document.getElementById(hash)
+      if (target) target.scrollIntoView({block: 'start', inline: 'nearest'})
+    }, 50)
+    return () => window.clearTimeout(handle)
+  }, [content])
+}
+
 export function MarkdownRenderer({content}: {content: string}) {
+  useHashScroll(content)
   return (
     <div className="help-md">
       <style>{`
@@ -684,6 +735,11 @@ export function MarkdownRenderer({content}: {content: string}) {
         .help-md li > p { margin: 0 0 0.35rem; }
         .help-md li:last-child { margin-bottom: 0; }
 
+        /* Leave breathing room when scrolled-to by an anchor click */
+        .help-md h1, .help-md h2, .help-md h3,
+        .help-md h4, .help-md h5, .help-md h6 {
+          scroll-margin-top: 1.25rem;
+        }
         /* Heading anchor link — hover-revealed, keeps the panel quiet */
         .help-md .help-md-anchor {
           margin-left: 0.4em;
