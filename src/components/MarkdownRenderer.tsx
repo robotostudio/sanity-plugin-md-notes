@@ -1,10 +1,26 @@
-import {Box, Card} from '@sanity/ui'
+import {
+  AsteriskIcon,
+  BulbOutlineIcon,
+  CheckmarkIcon,
+  CopyIcon,
+  DocumentIcon,
+  ErrorOutlineIcon,
+  InfoOutlineIcon,
+  WarningOutlineIcon,
+} from '@sanity/icons'
+import {Box, Card, Flex, Text} from '@sanity/ui'
 import React, {
   Children,
   createContext,
   isValidElement,
+  useCallback,
   useContext,
+  useEffect,
+  useRef,
+  useState,
   type CSSProperties,
+  type ComponentType,
+  type ReactNode,
 } from 'react'
 import ReactMarkdown, {type Components} from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -26,6 +42,7 @@ const baseHeading: CSSProperties = {
   fontWeight: 600,
   lineHeight: 1.3,
   color: 'inherit',
+  position: 'relative',
 }
 
 const styles: Record<string, CSSProperties> = {
@@ -105,9 +122,6 @@ const styles: Record<string, CSSProperties> = {
     lineHeight: 1.6,
     whiteSpace: 'pre',
   },
-  preWrap: {
-    margin: '0 0 1rem',
-  },
   link: {
     color: 'var(--card-link-fg-color)',
     textDecoration: 'underline',
@@ -139,6 +153,320 @@ const styles: Record<string, CSSProperties> = {
     margin: '0 0 1rem',
   },
 }
+
+// --- Remark plugins (inline, no extra deps) ----------------------------
+
+interface MdastNode {
+  type: string
+  value?: string
+  meta?: string
+  children?: MdastNode[]
+  data?: {hProperties?: Record<string, unknown>}
+}
+
+/**
+ * Copies the optional `title="..."` (or single-quoted) from a fenced code
+ * block's meta string onto the rendered `<code>` element as `data-title`.
+ * The `<pre>` renderer reads it to draw a label header above the block.
+ *
+ *     ```ts title="vite.config.ts"
+ *     ...
+ *     ```
+ */
+function remarkCodeMeta() {
+  return (tree: MdastNode) => {
+    walk(tree)
+    function walk(node: MdastNode): void {
+      if (node.type === 'code' && typeof node.meta === 'string') {
+        const titleMatch = node.meta.match(/title=(?:"([^"]+)"|'([^']+)')/)
+        if (titleMatch) {
+          const title = titleMatch[1] ?? titleMatch[2]
+          if (title) {
+            node.data = node.data ?? {}
+            node.data.hProperties = node.data.hProperties ?? {}
+            node.data.hProperties['data-title'] = title
+          }
+        }
+      }
+      if (Array.isArray(node.children)) node.children.forEach(walk)
+    }
+  }
+}
+
+const ADMONITION_TYPES = new Set(['note', 'tip', 'important', 'warning', 'caution'])
+
+/**
+ * GitHub-style alert syntax. Detects a blockquote whose first child paragraph
+ * starts with `[!TYPE]`, strips the marker, and stamps `data-admonition` on
+ * the blockquote element so the renderer can switch presentation.
+ *
+ *     > [!WARNING]
+ *     > Renaming a published slug breaks bookmarks.
+ */
+function remarkAdmonitions() {
+  return (tree: MdastNode) => {
+    walk(tree)
+    function walk(node: MdastNode): void {
+      if (node.type === 'blockquote' && Array.isArray(node.children)) {
+        const firstPara = node.children[0]
+        if (firstPara?.type === 'paragraph' && Array.isArray(firstPara.children)) {
+          const firstText = firstPara.children[0]
+          if (firstText?.type === 'text' && typeof firstText.value === 'string') {
+            const match = firstText.value.match(/^\[!([A-Z]+)\]\s*\n?/)
+            if (match && match[1]) {
+              const type = match[1].toLowerCase()
+              if (ADMONITION_TYPES.has(type)) {
+                firstText.value = firstText.value.slice(match[0].length)
+                if (firstText.value === '' && firstPara.children.length === 1) {
+                  node.children.shift()
+                }
+                node.data = node.data ?? {}
+                node.data.hProperties = node.data.hProperties ?? {}
+                node.data.hProperties['data-admonition'] = type
+              }
+            }
+          }
+        }
+      }
+      if (Array.isArray(node.children)) node.children.forEach(walk)
+    }
+  }
+}
+
+// --- Helpers -----------------------------------------------------------
+
+/** Convert a React children tree into a flat plain-text string. */
+function getTextFromChildren(children: ReactNode): string {
+  if (children == null || typeof children === 'boolean') return ''
+  if (typeof children === 'string' || typeof children === 'number') return String(children)
+  if (Array.isArray(children)) return children.map(getTextFromChildren).join('')
+  if (isValidElement(children)) {
+    const props = children.props as {children?: ReactNode}
+    return getTextFromChildren(props.children)
+  }
+  return ''
+}
+
+/** Slugify for heading anchors. Lowercase, kebab, strip punctuation. */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
+
+// --- Heading with anchor link -----------------------------------------
+
+function HeadingAnchor({slug}: {slug: string}) {
+  const onClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey) return
+      event.preventDefault()
+      const target = document.getElementById(slug)
+      if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'})
+    },
+    [slug],
+  )
+  return (
+    <a
+      href={`#${slug}`}
+      onClick={onClick}
+      className="help-md-anchor"
+      aria-label="Link to this section"
+    >
+      #
+    </a>
+  )
+}
+
+function makeHeading(
+  level: 1 | 2 | 3 | 4 | 5 | 6,
+  style: CSSProperties,
+): Components[`h${typeof level}`] {
+  const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+  return ({children}) => {
+    const text = getTextFromChildren(children)
+    const slug = slugify(text)
+    return (
+      <Tag id={slug || undefined} style={style}>
+        {children}
+        {slug ? <HeadingAnchor slug={slug} /> : null}
+      </Tag>
+    )
+  }
+}
+
+// --- Code block with title header + copy button -----------------------
+
+/** Pulls `data-title` off the inner `<code>` element that react-markdown emits. */
+function getCodeTitle(children: ReactNode): string | undefined {
+  let title: string | undefined
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return
+    const props = child.props as Record<string, unknown>
+    const value = props['data-title']
+    if (typeof value === 'string' && value) title = value
+  })
+  return title
+}
+
+function CodeBlock({children}: {children?: ReactNode}) {
+  const title = getCodeTitle(children)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
+
+  const onCopy = useCallback(() => {
+    const text = scrollRef.current?.textContent ?? ''
+    if (!text) return
+    const fallbackCopy = () => {
+      try {
+        const ta = document.createElement('textarea')
+        ta.value = text
+        ta.setAttribute('readonly', '')
+        ta.style.position = 'absolute'
+        ta.style.left = '-9999px'
+        document.body.appendChild(ta)
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
+        return true
+      } catch {
+        return false
+      }
+    }
+    const flash = () => {
+      setCopied(true)
+      if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => setCopied(false), 1500)
+    }
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(flash, () => {
+        if (fallbackCopy()) flash()
+      })
+    } else if (fallbackCopy()) {
+      flash()
+    }
+  }, [])
+
+  return (
+    <Card
+      radius={2}
+      border
+      tone="transparent"
+      className="help-md-codeblock"
+      style={{margin: '0 0 1rem', overflow: 'hidden'}}
+    >
+      {title ? (
+        <Flex
+          align="center"
+          gap={2}
+          paddingX={3}
+          paddingY={3}
+          style={{
+            borderBottom: BORDER,
+            background: 'var(--card-code-bg-color)',
+          }}
+        >
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              fontSize: '18px',
+              lineHeight: 1,
+              color: 'var(--card-muted-fg-color)',
+            }}
+          >
+            <DocumentIcon />
+          </span>
+          <Text
+            size={2}
+            muted
+            style={{fontFamily: MONO_FONT, lineHeight: 1}}
+          >
+            {title}
+          </Text>
+        </Flex>
+      ) : null}
+      <div style={{position: 'relative'}}>
+        <button
+          type="button"
+          onClick={onCopy}
+          className={`help-md-copy-btn${copied ? ' is-copied' : ''}`}
+          aria-label={copied ? 'Copied' : 'Copy code'}
+          title={copied ? 'Copied' : 'Copy code'}
+        >
+          {copied ? <CheckmarkIcon /> : <CopyIcon />}
+        </button>
+        <div
+          ref={scrollRef}
+          style={{
+            padding: '0.75rem 1rem',
+            maxHeight: '22rem',
+            overflow: 'auto',
+          }}
+        >
+          <pre style={styles.pre}>
+            <InPreContext.Provider value={true}>{children}</InPreContext.Provider>
+          </pre>
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+// --- Admonitions -------------------------------------------------------
+
+type AdmonitionType = 'note' | 'tip' | 'important' | 'warning' | 'caution'
+
+const ADMONITIONS: Record<
+  AdmonitionType,
+  {
+    label: string
+    icon: ComponentType
+    tone: 'primary' | 'positive' | 'caution' | 'critical'
+  }
+> = {
+  note: {label: 'Note', icon: InfoOutlineIcon, tone: 'primary'},
+  tip: {label: 'Tip', icon: BulbOutlineIcon, tone: 'positive'},
+  important: {label: 'Important', icon: AsteriskIcon, tone: 'primary'},
+  warning: {label: 'Warning', icon: WarningOutlineIcon, tone: 'caution'},
+  caution: {label: 'Caution', icon: ErrorOutlineIcon, tone: 'critical'},
+}
+
+function Admonition({type, children}: {type: AdmonitionType; children?: ReactNode}) {
+  const config = ADMONITIONS[type]
+  const Icon = config.icon
+  return (
+    <Card
+      radius={2}
+      paddingX={3}
+      paddingY={3}
+      tone={config.tone}
+      style={{margin: '0 0 1rem'}}
+    >
+      <Flex align="center" gap={2} marginBottom={2}>
+        <Text size={1} weight="semibold" style={{lineHeight: 1}}>
+          <Icon />
+        </Text>
+        <Text size={1} weight="semibold">
+          {config.label}
+        </Text>
+      </Flex>
+      <div className="help-md-admonition-body">{children}</div>
+    </Card>
+  )
+}
+
+// --- Video embeds (unchanged behaviour) -------------------------------
 
 interface VideoProvider {
   name: string
@@ -253,13 +581,15 @@ function VideoEmbed({provider, embedUrl}: Embed) {
   )
 }
 
+// --- Component map -----------------------------------------------------
+
 const components: Components = {
-  h1: ({children}) => <h1 style={styles.h1}>{children}</h1>,
-  h2: ({children}) => <h2 style={styles.h2}>{children}</h2>,
-  h3: ({children}) => <h3 style={styles.h3}>{children}</h3>,
-  h4: ({children}) => <h4 style={styles.h4}>{children}</h4>,
-  h5: ({children}) => <h5 style={styles.h5}>{children}</h5>,
-  h6: ({children}) => <h6 style={styles.h6}>{children}</h6>,
+  h1: makeHeading(1, styles.h1!),
+  h2: makeHeading(2, styles.h2!),
+  h3: makeHeading(3, styles.h3!),
+  h4: makeHeading(4, styles.h4!),
+  h5: makeHeading(5, styles.h5!),
+  h6: makeHeading(6, styles.h6!),
   p: ({children}) => {
     const embed = findBareVideoLink(children)
     if (embed) return <VideoEmbed {...embed} />
@@ -271,25 +601,16 @@ const components: Components = {
   ul: ({children}) => <ul style={styles.ul}>{children}</ul>,
   ol: ({children}) => <ol style={styles.ol}>{children}</ol>,
   li: ({children}) => <li style={styles.li}>{children}</li>,
-  code: ({children}) => {
+  code: ({children, ...rest}) => {
     const inPre = useContext(InPreContext)
-    if (inPre) return <code>{children}</code>
+    if (inPre) {
+      // Inside a fenced block — render plain so the outer CodeBlock controls styling
+      const dataTitle = (rest as Record<string, unknown>)['data-title']
+      return <code data-title={typeof dataTitle === 'string' ? dataTitle : undefined}>{children}</code>
+    }
     return <code style={styles.inlineCode}>{children}</code>
   },
-  pre: ({children}) => (
-    <Card
-      padding={3}
-      radius={2}
-      tone="transparent"
-      border
-      overflow="auto"
-      style={{...styles.preWrap, maxHeight: '22rem'}}
-    >
-      <pre style={styles.pre}>
-        <InPreContext.Provider value={true}>{children}</InPreContext.Provider>
-      </pre>
-    </Card>
-  ),
+  pre: ({children}) => <CodeBlock>{children}</CodeBlock>,
   a: ({href, children}) => {
     const isExternal = !!href && /^https?:\/\//i.test(href)
     return (
@@ -302,20 +623,26 @@ const components: Components = {
       </a>
     )
   },
-  blockquote: ({children}) => (
-    <Card
-      paddingX={3}
-      paddingY={1}
-      radius={2}
-      tone="primary"
-      style={{
-        borderLeft: '3px solid var(--card-focus-ring-color)',
-        margin: '0 0 1rem',
-      }}
-    >
-      {children}
-    </Card>
-  ),
+  blockquote: ({children, ...rest}) => {
+    const admonitionType = (rest as Record<string, unknown>)['data-admonition']
+    if (typeof admonitionType === 'string' && admonitionType in ADMONITIONS) {
+      return <Admonition type={admonitionType as AdmonitionType}>{children}</Admonition>
+    }
+    return (
+      <Card
+        paddingX={3}
+        paddingY={1}
+        radius={2}
+        tone="primary"
+        style={{
+          borderLeft: '3px solid var(--card-focus-ring-color)',
+          margin: '0 0 1rem',
+        }}
+      >
+        {children}
+      </Card>
+    )
+  },
   hr: () => <hr style={styles.hr} />,
   img: ({src, alt}) => (
     <img
@@ -356,8 +683,75 @@ export function MarkdownRenderer({content}: {content: string}) {
         .help-md p:last-child { margin-bottom: 0; }
         .help-md li > p { margin: 0 0 0.35rem; }
         .help-md li:last-child { margin-bottom: 0; }
+
+        /* Heading anchor link — hover-revealed, keeps the panel quiet */
+        .help-md .help-md-anchor {
+          margin-left: 0.4em;
+          font-weight: 400;
+          text-decoration: none;
+          color: var(--card-muted-fg-color);
+          opacity: 0;
+          transition: opacity 0.12s ease-in-out;
+        }
+        .help-md h1:hover .help-md-anchor,
+        .help-md h2:hover .help-md-anchor,
+        .help-md h3:hover .help-md-anchor,
+        .help-md h4:hover .help-md-anchor,
+        .help-md h5:hover .help-md-anchor,
+        .help-md h6:hover .help-md-anchor,
+        .help-md .help-md-anchor:focus-visible {
+          opacity: 1;
+        }
+
+        /* Copy button on code blocks — hover-revealed, glass-backdrop */
+        .help-md .help-md-codeblock {
+          position: relative;
+        }
+        .help-md .help-md-copy-btn {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          padding: 0;
+          font-size: 16px;
+          color: var(--card-muted-fg-color);
+          background: color-mix(in srgb, var(--card-bg-color) 55%, transparent);
+          backdrop-filter: blur(8px) saturate(140%);
+          -webkit-backdrop-filter: blur(8px) saturate(140%);
+          border: 1px solid var(--card-border-color);
+          border-radius: 6px;
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.12s, color 0.12s, background 0.12s;
+          z-index: 1;
+        }
+        .help-md .help-md-codeblock:hover .help-md-copy-btn,
+        .help-md .help-md-copy-btn:focus-visible,
+        .help-md .help-md-copy-btn.is-copied {
+          opacity: 1;
+        }
+        .help-md .help-md-copy-btn:hover {
+          color: var(--card-fg-color);
+          background: color-mix(in srgb, var(--card-bg-color) 75%, transparent);
+        }
+        .help-md .help-md-copy-btn.is-copied {
+          color: #2db571;
+          color: var(--card-badge-positive-dot-color, #2db571);
+        }
+
+        /* Admonition body — strip the trailing margin off the last paragraph */
+        .help-md .help-md-admonition-body > :last-child {
+          margin-bottom: 0;
+        }
       `}</style>
-      <ReactMarkdown components={components} remarkPlugins={[remarkGfm]}>
+      <ReactMarkdown
+        components={components}
+        remarkPlugins={[remarkGfm, remarkCodeMeta, remarkAdmonitions]}
+      >
         {content}
       </ReactMarkdown>
     </div>
