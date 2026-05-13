@@ -209,15 +209,28 @@ every list / pane needs them.
 
 ### Kebab "Help" item on a document list
 
+Calling `.menuItems([...])` on a list pane **replaces** the default sort
+options that Sanity would otherwise auto-build from the schema's
+`orderings`. Pass the structure resolver's `context` to `helpMenuItems`
+and the helper appends those defaults for you:
+
 ```ts
 import {helpMenuItems} from 'sanity-plugin-help'
 
-S.documentList()
-  .filter('_type == "page"')
-  .menuItems([
-    ...helpMenuItems(S, 'page'),
-    ...yourSortItems(S),
-  ])
+// Structure resolver receives (S, context) — pass context through:
+S.documentTypeList('page').menuItems(
+  helpMenuItems(S, 'page', context), // Help + schema's default sorts
+)
+```
+
+If you want a fully custom sort set (no defaults), skip the context and
+spread your own orderings:
+
+```ts
+S.documentTypeList('page').menuItems([
+  ...helpMenuItems(S, 'page'),
+  S.orderingMenuItem({name: 'foo', title: 'Foo', by: [/* ... */]}),
+])
 ```
 
 ### Help tab on a singleton
