@@ -1,6 +1,6 @@
 import type {UserViewComponent} from 'sanity/structure'
 import {getHelp} from '../registry'
-import {HelpPanel, HelpPanelEmpty} from './HelpPanel'
+import {HelpPanel, HelpPanelEmpty} from './help-panel'
 
 export const HelpView: UserViewComponent = ({schemaType}) => {
   const entry = getHelp(schemaType.name)

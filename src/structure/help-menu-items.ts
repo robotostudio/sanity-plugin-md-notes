@@ -1,7 +1,7 @@
 import {getOrderingMenuItemsForSchemaType} from 'sanity/structure'
 import {openHelpDialog} from '../components/help-dialog-store'
-import {HelpIcon} from '../components/HelpIcon'
-import {isHelpActive} from '../schema/withHelp'
+import {HelpIcon} from '../components/help-icon'
+import {isHelpActive} from '../schema/with-help'
 
 /**
  * Returns a list-pane menu item that opens the help dialog for `schemaType`,
@@ -23,11 +23,7 @@ import {isHelpActive} from '../schema/withHelp'
  *     S.orderingMenuItem({name: 'foo', title: 'Foo', by: [...]}),
  *   ])
  */
-export function helpMenuItems(
-  S: any,
-  schemaType: string,
-  context?: {schema: unknown},
-): any[] {
+export function helpMenuItems(S: any, schemaType: string, context?: {schema: unknown}): any[] {
   if (!isHelpActive(schemaType)) {
     return context ? getOrderingMenuItemsForSchemaType(context as never, schemaType) : []
   }

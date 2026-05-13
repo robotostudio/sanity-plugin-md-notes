@@ -1,7 +1,7 @@
 import type {DefaultDocumentNodeResolver} from 'sanity/structure'
-import {HelpIcon} from '../components/HelpIcon'
-import {HelpView} from '../components/HelpView'
-import {isHelpActive} from '../schema/withHelp'
+import {HelpIcon} from '../components/help-icon'
+import {HelpView} from '../components/help-view'
+import {isHelpActive} from '../schema/with-help'
 
 /**
  * Composes a `defaultDocumentNode` resolver that injects the Help view tab
@@ -40,9 +40,7 @@ export function withHelpDefaultDocumentNode(
     const existingViews =
       typeof builderWithViews.getViews === 'function' ? builderWithViews.getViews() : null
     if (existingViews && existingViews.length > 0) {
-      return baseNode.views([...existingViews, helpView] as Parameters<
-        typeof baseNode.views
-      >[0])
+      return baseNode.views([...existingViews, helpView] as Parameters<typeof baseNode.views>[0])
     }
     return baseNode.views([S.view.form(), helpView])
   }

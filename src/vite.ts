@@ -82,7 +82,10 @@ function parseGithubRepo(input: string | {url?: string} | null | undefined): str
   if (!input) return null
   const raw = typeof input === 'string' ? input : input.url
   if (!raw || typeof raw !== 'string') return null
-  const cleaned = raw.trim().replace(/^git\+/, '').replace(/\.git$/, '')
+  const cleaned = raw
+    .trim()
+    .replace(/^git\+/, '')
+    .replace(/\.git$/, '')
   const ghShort = cleaned.match(/^github:([\w.-]+)\/([\w.-]+)$/i)
   if (ghShort) return `${ghShort[1]}/${ghShort[2]}`
   const ghUrl = cleaned.match(/github\.com[:/]([\w.-]+)\/([\w.-]+?)(?:[/?#]|$)/i)

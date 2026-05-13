@@ -128,12 +128,18 @@ import {structureTool} from 'sanity/structure'
 import {helpPlugin, withHelpDefaultDocumentNode} from 'sanity-plugin-help'
 
 const helpFiles: Record<string, string> = {}
-const helpCtx = (require as unknown as {
-  context: (dir: string, deep: boolean, pattern: RegExp) => {
-    keys(): string[]
-    (key: string): string
+const helpCtx = (
+  require as unknown as {
+    context: (
+      dir: string,
+      deep: boolean,
+      pattern: RegExp,
+    ) => {
+      keys(): string[]
+      (key: string): string
+    }
   }
-}).context('./sanity/schemas', true, /\.help\.md$/)
+).context('./sanity/schemas', true, /\.help\.md$/)
 helpCtx.keys().forEach((k) => {
   helpFiles[k] = helpCtx(k)
 })
@@ -180,7 +186,9 @@ export default withHelp(
   defineType({
     name: 'page',
     type: 'document',
-    fields: [/* ... */],
+    fields: [
+      /* ... */
+    ],
   }),
 )
 ```
@@ -229,7 +237,13 @@ spread your own orderings:
 ```ts
 S.documentTypeList('page').menuItems([
   ...helpMenuItems(S, 'page'),
-  S.orderingMenuItem({name: 'foo', title: 'Foo', by: [/* ... */]}),
+  S.orderingMenuItem({
+    name: 'foo',
+    title: 'Foo',
+    by: [
+      /* ... */
+    ],
+  }),
 ])
 ```
 
@@ -254,12 +268,12 @@ keeps acting as a regular link.
 
 Supported URL shapes:
 
-| Provider | Patterns |
-|---|---|
-| Loom | `loom.com/share/<id>`, `loom.com/embed/<id>` |
-| YouTube | `youtube.com/watch?v=<id>`, `youtu.be/<id>`, `youtube.com/embed/<id>`, `youtube.com/shorts/<id>` |
-| Vimeo | `vimeo.com/<id>`, `player.vimeo.com/video/<id>` |
-| Wistia | `*.wistia.com/medias/<id>`, `*.wistia.net/medias/<id>`, `fast.wistia.net/embed/iframe/<id>` |
+| Provider | Patterns                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------ |
+| Loom     | `loom.com/share/<id>`, `loom.com/embed/<id>`                                                     |
+| YouTube  | `youtube.com/watch?v=<id>`, `youtu.be/<id>`, `youtube.com/embed/<id>`, `youtube.com/shorts/<id>` |
+| Vimeo    | `vimeo.com/<id>`, `player.vimeo.com/video/<id>`                                                  |
+| Wistia   | `*.wistia.com/medias/<id>`, `*.wistia.net/medias/<id>`, `fast.wistia.net/embed/iframe/<id>`      |
 
 ## Configuration
 

@@ -391,11 +391,7 @@ function CodeBlock({children}: {children?: ReactNode}) {
           >
             <DocumentIcon />
           </span>
-          <Text
-            size={2}
-            muted
-            style={{fontFamily: MONO_FONT, lineHeight: 1}}
-          >
+          <Text size={2} muted style={{fontFamily: MONO_FONT, lineHeight: 1}}>
             {title}
           </Text>
         </Flex>
@@ -516,7 +512,9 @@ const videoProviders: VideoProvider[] = [
       if (watch) return `https://www.youtube-nocookie.com/embed/${watch[1]}`
       const short = url.match(/^https?:\/\/youtu\.be\/([\w-]{6,})/i)
       if (short) return `https://www.youtube-nocookie.com/embed/${short[1]}`
-      const embed = url.match(/^https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([\w-]{6,})/i)
+      const embed = url.match(
+        /^https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([\w-]{6,})/i,
+      )
       if (embed) return `https://www.youtube-nocookie.com/embed/${embed[1]}`
       const shorts = url.match(/^https?:\/\/(?:www\.)?youtube\.com\/shorts\/([\w-]{6,})/i)
       if (shorts) return `https://www.youtube-nocookie.com/embed/${shorts[1]}`
@@ -557,9 +555,7 @@ function detectVideoEmbed(url: string): Embed | null {
 }
 
 function findBareVideoLink(children: React.ReactNode): Embed | null {
-  const arr = Children.toArray(children).filter(
-    (c) => typeof c !== 'string' || c.trim() !== '',
-  )
+  const arr = Children.toArray(children).filter((c) => typeof c !== 'string' || c.trim() !== '')
   if (arr.length !== 1) return null
   const only = arr[0]
   if (!isValidElement(only)) return null
@@ -568,9 +564,7 @@ function findBareVideoLink(children: React.ReactNode): Embed | null {
   if (typeof href !== 'string') return null
   const linkChildren = Children.toArray(props.children)
   const isBare =
-    linkChildren.length === 1 &&
-    typeof linkChildren[0] === 'string' &&
-    linkChildren[0] === href
+    linkChildren.length === 1 && typeof linkChildren[0] === 'string' && linkChildren[0] === href
   if (!isBare) return null
   return detectVideoEmbed(href)
 }
@@ -637,7 +631,9 @@ const components: Components = {
     if (inPre) {
       // Inside a fenced block — render plain so the outer CodeBlock controls styling
       const dataTitle = (rest as Record<string, unknown>)['data-title']
-      return <code data-title={typeof dataTitle === 'string' ? dataTitle : undefined}>{children}</code>
+      return (
+        <code data-title={typeof dataTitle === 'string' ? dataTitle : undefined}>{children}</code>
+      )
     }
     return <code style={styles.inlineCode}>{children}</code>
   },

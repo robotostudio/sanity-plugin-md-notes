@@ -1,6 +1,6 @@
 import {definePlugin} from 'sanity'
-import {HelpLayout} from './components/HelpLayout'
-import {helpInspector} from './components/HelpInspector'
+import {HelpLayout} from './components/help-layout'
+import {helpInspector} from './components/help-inspector'
 import {initHelpRegistry, type HelpRegistryOptions} from './registry'
 
 export interface HelpPluginConfig extends HelpRegistryOptions {}

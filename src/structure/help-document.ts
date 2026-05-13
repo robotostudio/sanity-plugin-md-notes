@@ -1,6 +1,6 @@
-import {HelpIcon} from '../components/HelpIcon'
-import {HelpView} from '../components/HelpView'
-import {isHelpActive} from '../schema/withHelp'
+import {HelpIcon} from '../components/help-icon'
+import {HelpView} from '../components/help-view'
+import {isHelpActive} from '../schema/with-help'
 
 /**
  * Returns an `S.document()` builder for a singleton with the Help view tab
@@ -9,12 +9,7 @@ import {isHelpActive} from '../schema/withHelp'
  *
  *   helpDocument(S, 'not-found-page', 'not-found-page-en', 'English 404 Page')
  */
-export function helpDocument(
-  S: any,
-  schemaType: string,
-  documentId: string,
-  title?: string,
-) {
+export function helpDocument(S: any, schemaType: string, documentId: string, title?: string) {
   let doc = S.document().schemaType(schemaType).documentId(documentId)
   if (title) doc = doc.title(title)
   if (isHelpActive(schemaType)) {

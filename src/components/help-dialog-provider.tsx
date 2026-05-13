@@ -1,7 +1,7 @@
 import {Dialog} from '@sanity/ui'
 import {type ReactNode, useEffect, useState} from 'react'
 import {getHelp} from '../registry'
-import {HelpPanel, HelpPanelEmpty} from './HelpPanel'
+import {HelpPanel, HelpPanelEmpty} from './help-panel'
 import {closeHelpDialog, subscribeHelpDialog} from './help-dialog-store'
 
 export function HelpDialogProvider({children}: {children: ReactNode}) {

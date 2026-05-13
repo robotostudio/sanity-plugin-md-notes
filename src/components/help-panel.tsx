@@ -1,7 +1,7 @@
 import {LaunchIcon} from '@sanity/icons'
 import {Box, Card, Flex, Stack, Text} from '@sanity/ui'
 import {getEditUrl, type HelpEntry} from '../registry'
-import {MarkdownRenderer} from './MarkdownRenderer'
+import {MarkdownRenderer} from './markdown-renderer'
 
 function formatDate(iso: string | null): string | null {
   if (!iso) return null

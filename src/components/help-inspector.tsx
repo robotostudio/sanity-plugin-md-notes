@@ -1,8 +1,8 @@
 import {defineDocumentInspector, type DocumentInspectorProps} from 'sanity'
-import {isHelpActive} from '../schema/withHelp'
+import {isHelpActive} from '../schema/with-help'
 import {getHelp} from '../registry'
-import {HelpIcon} from './HelpIcon'
-import {HelpPanel, HelpPanelEmpty} from './HelpPanel'
+import {HelpIcon} from './help-icon'
+import {HelpPanel, HelpPanelEmpty} from './help-panel'
 
 function HelpInspectorComponent({documentType}: DocumentInspectorProps) {
   const entry = getHelp(documentType)
