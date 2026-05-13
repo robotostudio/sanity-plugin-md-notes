@@ -1,7 +1,21 @@
 import {Box, Card} from '@sanity/ui'
-import React, {Children, isValidElement, type CSSProperties} from 'react'
+import React, {
+  Children,
+  createContext,
+  isValidElement,
+  useContext,
+  type CSSProperties,
+} from 'react'
 import ReactMarkdown, {type Components} from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+
+/**
+ * react-markdown renders both inline `` `code` `` and fenced `` ``` `` blocks
+ * with the same `<code>` element, so the same renderer is called for both.
+ * The `<pre>` renderer flips this context to `true`, letting the `<code>`
+ * renderer skip the inline pill styles when it's nested inside a block.
+ */
+const InPreContext = createContext(false)
 
 const MONO_FONT =
   'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace'
@@ -257,10 +271,23 @@ const components: Components = {
   ul: ({children}) => <ul style={styles.ul}>{children}</ul>,
   ol: ({children}) => <ol style={styles.ol}>{children}</ol>,
   li: ({children}) => <li style={styles.li}>{children}</li>,
-  code: ({children}) => <code style={styles.inlineCode}>{children}</code>,
+  code: ({children}) => {
+    const inPre = useContext(InPreContext)
+    if (inPre) return <code>{children}</code>
+    return <code style={styles.inlineCode}>{children}</code>
+  },
   pre: ({children}) => (
-    <Card padding={3} radius={2} tone="transparent" border overflow="auto" style={styles.preWrap}>
-      <pre style={styles.pre}>{children}</pre>
+    <Card
+      padding={3}
+      radius={2}
+      tone="transparent"
+      border
+      overflow="auto"
+      style={{...styles.preWrap, maxHeight: '22rem'}}
+    >
+      <pre style={styles.pre}>
+        <InPreContext.Provider value={true}>{children}</InPreContext.Provider>
+      </pre>
     </Card>
   ),
   a: ({href, children}) => {
