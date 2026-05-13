@@ -16,7 +16,7 @@ Commit all changes, push to remote, and create a draft pull request.
 4. Stage and commit changes with a concise message
 5. Push branch to remote with '-u' flag
 6. Make sure to check, we're using "sameerroboto" account in gh cli
-6. Create draft PR using 'gh pr create -- draft'
+7. Create draft PR using 'gh pr create -- draft'
 
 ## PR Body Format
 
