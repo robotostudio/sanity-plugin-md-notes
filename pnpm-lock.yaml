@@ -30,6 +30,9 @@ importers:
       '@sanity/ui':
         specifier: ^3.1.11
         version: 3.2.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.6(react@19.2.6))(react-is@19.2.6)(react@19.2.6)(styled-components@6.4.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
+      '@types/node':
+        specifier: ^25.7.0
+        version: 25.7.0
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
