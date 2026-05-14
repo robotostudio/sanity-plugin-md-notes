@@ -13,7 +13,7 @@ export type HelpPluginConfig = HelpRegistryOptions
  * Usage in `sanity.config.ts`:
  *
  *   import {defineConfig} from 'sanity'
- *   import {helpPlugin, withHelpDefaultDocumentNode} from 'sanity-plugin-help'
+ *   import {helpPlugin, withHelpDefaultDocumentNode} from 'sanity-plugin-md-notes'
  *
  *   // Vite (most Sanity studios):
  *   const helpFiles = import.meta.glob('./sanity/schemas/**\/*.help.md', {
@@ -42,7 +42,7 @@ export type HelpPluginConfig = HelpRegistryOptions
 export const helpPlugin = definePlugin<HelpPluginConfig>((config) => {
   initHelpRegistry(config)
   return {
-    name: 'sanity-plugin-help',
+    name: 'sanity-plugin-md-notes',
     document: {
       inspectors: (prev) => [helpInspector, ...prev],
     },

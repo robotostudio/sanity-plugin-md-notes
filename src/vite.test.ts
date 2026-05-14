@@ -9,7 +9,7 @@ import {sanityHelpVite} from './vite'
 let workDir: string
 
 beforeEach(() => {
-  workDir = mkdtempSync(join(tmpdir(), 'sanity-plugin-help-vite-'))
+  workDir = mkdtempSync(join(tmpdir(), 'sanity-plugin-md-notes-vite-'))
 })
 
 afterEach(() => {
@@ -30,12 +30,12 @@ describe('sanityHelpVite()', () => {
   test('config() excludes the git-repo stub from optimizeDeps', () => {
     const plugin = sanityHelpVite()
     const cfg = plugin.config!()
-    expect(cfg.optimizeDeps?.exclude).toContain('sanity-plugin-help/git-repo')
+    expect(cfg.optimizeDeps?.exclude).toContain('sanity-plugin-md-notes/git-repo')
   })
 
   test('resolveId intercepts the git-repo subpath', () => {
     const plugin = sanityHelpVite()
-    const id = plugin.resolveId!('sanity-plugin-help/git-repo')
+    const id = plugin.resolveId!('sanity-plugin-md-notes/git-repo')
     expect(typeof id).toBe('string')
     expect(id).toMatch(/^\0/) // null-byte prefix = virtual module
   })
@@ -49,7 +49,7 @@ describe('sanityHelpVite()', () => {
   test('load returns the override repo when one is configured', () => {
     const plugin = sanityHelpVite({override: 'org/repo'})
     plugin.configResolved!()
-    const resolved = plugin.resolveId!('sanity-plugin-help/git-repo')!
+    const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     const result = plugin.load!(resolved)!
     expect(result).toContain('"org/repo"')
     expect(result).toContain('export default')
@@ -59,7 +59,7 @@ describe('sanityHelpVite()', () => {
     writeGitConfig('https://github.com/foo/bar.git')
     const plugin = sanityHelpVite({cwd: workDir})
     plugin.configResolved!()
-    const resolved = plugin.resolveId!('sanity-plugin-help/git-repo')!
+    const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toContain('"foo/bar"')
   })
 
@@ -67,7 +67,7 @@ describe('sanityHelpVite()', () => {
     writeGitConfig('git@github.com:foo/bar.git')
     const plugin = sanityHelpVite({cwd: workDir})
     plugin.configResolved!()
-    const resolved = plugin.resolveId!('sanity-plugin-help/git-repo')!
+    const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toContain('"foo/bar"')
   })
 
@@ -78,7 +78,7 @@ describe('sanityHelpVite()', () => {
 
     const plugin = sanityHelpVite({cwd: nested})
     plugin.configResolved!()
-    const resolved = plugin.resolveId!('sanity-plugin-help/git-repo')!
+    const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toContain('"foo/bar"')
   })
 
@@ -86,7 +86,7 @@ describe('sanityHelpVite()', () => {
     // No writeGitConfig — empty workDir
     const plugin = sanityHelpVite({cwd: workDir})
     plugin.configResolved!()
-    const resolved = plugin.resolveId!('sanity-plugin-help/git-repo')!
+    const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toBe('export default null;\n')
   })
 
@@ -94,7 +94,7 @@ describe('sanityHelpVite()', () => {
     writeGitConfig('https://gitlab.com/foo/bar.git')
     const plugin = sanityHelpVite({cwd: workDir})
     plugin.configResolved!()
-    const resolved = plugin.resolveId!('sanity-plugin-help/git-repo')!
+    const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toBe('export default null;\n')
   })
 
@@ -112,7 +112,7 @@ describe('sanityHelpVite()', () => {
 
     const plugin = sanityHelpVite({cwd: workDir})
     plugin.configResolved!()
-    const resolved = plugin.resolveId!('sanity-plugin-help/git-repo')!
+    const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toContain('"foo/bar"')
   })
 })

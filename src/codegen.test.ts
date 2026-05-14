@@ -9,7 +9,7 @@ import {generateHelpFiles} from './codegen'
 let workDir: string
 
 beforeEach(() => {
-  workDir = mkdtempSync(join(tmpdir(), 'sanity-plugin-help-codegen-'))
+  workDir = mkdtempSync(join(tmpdir(), 'sanity-plugin-md-notes-codegen-'))
 })
 
 afterEach(() => {

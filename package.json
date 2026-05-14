@@ -1,5 +1,5 @@
 {
-  "name": "sanity-plugin-help",
+  "name": "sanity-plugin-md-notes",
   "version": "1.0.0",
   "description": "Drop a `<schemaName>.help.md` next to a Sanity schema and editors get a native Help inspector + view tab in Studio.",
   "keywords": [
@@ -46,7 +46,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "sanity-plugin-help": "./dist/cli.js"
+    "sanity-plugin-md-notes": "./dist/cli.js"
   },
   "files": [
     "dist",

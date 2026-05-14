@@ -1,17 +1,17 @@
 /// <reference types="node" />
 /**
- * Vite plugin for `sanity-plugin-help`.
+ * Vite plugin for `sanity-plugin-md-notes`.
  *
  * Detects the consumer's GitHub remote from `.git/config` at dev/build time
- * and replaces the runtime stub at `sanity-plugin-help/git-repo` with the
+ * and replaces the runtime stub at `sanity-plugin-md-notes/git-repo` with the
  * resolved value:
  *
  *     // vite.config.ts
- *     import {sanityHelpVite} from 'sanity-plugin-help/vite'
+ *     import {sanityHelpVite} from 'sanity-plugin-md-notes/vite'
  *     export default defineConfig({plugins: [sanityHelpVite()]})
  *
  *     // sanity.config.ts
- *     import gitRepo from 'sanity-plugin-help/git-repo'
+ *     import gitRepo from 'sanity-plugin-md-notes/git-repo'
  *     helpPlugin({files: helpFiles, githubRepo: gitRepo})
  *
  * `gitRepo` resolves to `'owner/repo'` when the origin remote points at
@@ -28,8 +28,8 @@ import {dirname, join, resolve} from 'node:path'
 
 import {parseGithubRepo} from './parse-github-repo'
 
-const STUB_ID = 'sanity-plugin-help/git-repo'
-const RESOLVED_ID = '\0sanity-plugin-help:git-repo'
+const STUB_ID = 'sanity-plugin-md-notes/git-repo'
+const RESOLVED_ID = '\0sanity-plugin-md-notes:git-repo'
 
 export interface SanityHelpViteOptions {
   /**
@@ -93,11 +93,11 @@ export function sanityHelpVite(options: SanityHelpViteOptions = {}): MinimalVite
   let repo: string | null = null
 
   return {
-    name: 'sanity-plugin-help:vite',
+    name: 'sanity-plugin-md-notes:vite',
     enforce: 'pre',
     config() {
       // Vite pre-bundles npm deps before plugins run; without this exclude,
-      // `sanity-plugin-help/git-repo` would be resolved to the null stub
+      // `sanity-plugin-md-notes/git-repo` would be resolved to the null stub
       // before our resolveId hook gets a chance to intercept it.
       return {optimizeDeps: {exclude: [STUB_ID]}}
     },

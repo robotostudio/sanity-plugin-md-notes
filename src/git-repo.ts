@@ -1,5 +1,5 @@
 /**
- * Runtime stub for `sanity-plugin-help/git-repo`.
+ * Runtime stub for `sanity-plugin-md-notes/git-repo`.
  *
  * Without the Vite plugin, this resolves to `null` and the "Edit on GitHub"
  * footer is suppressed silently. With `sanityHelpVite()` registered in

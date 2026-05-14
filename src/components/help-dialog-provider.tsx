@@ -17,7 +17,7 @@ export function HelpDialogProvider({children}: {children: ReactNode}): ReactElem
       {children}
       {schemaType && (
         <Dialog
-          id="sanity-plugin-help-dialog"
+          id="sanity-plugin-md-notes-dialog"
           header="Help"
           onClose={closeHelpDialog}
           onClickOutside={closeHelpDialog}

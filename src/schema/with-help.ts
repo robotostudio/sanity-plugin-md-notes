@@ -10,7 +10,7 @@ const helpEnabledSchemas = new Set<string>()
  * Opts a schema into the help system. Wrap the schema definition:
  *
  *   import {defineType} from 'sanity'
- *   import {withHelp} from 'sanity-plugin-help'
+ *   import {withHelp} from 'sanity-plugin-md-notes'
  *
  *   export default withHelp(defineType({
  *     name: 'page',

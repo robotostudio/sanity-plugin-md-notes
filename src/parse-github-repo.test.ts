@@ -4,38 +4,38 @@ import {parseGithubRepo} from './parse-github-repo'
 
 describe('parseGithubRepo', () => {
   test('owner/repo shorthand', () => {
-    expect(parseGithubRepo('robotostudio/sanity-plugin-help')).toBe(
-      'robotostudio/sanity-plugin-help',
+    expect(parseGithubRepo('robotostudio/sanity-plugin-md-notes')).toBe(
+      'robotostudio/sanity-plugin-md-notes',
     )
   })
 
   test('https URL with .git suffix', () => {
-    expect(parseGithubRepo('https://github.com/robotostudio/sanity-plugin-help.git')).toBe(
-      'robotostudio/sanity-plugin-help',
+    expect(parseGithubRepo('https://github.com/robotostudio/sanity-plugin-md-notes.git')).toBe(
+      'robotostudio/sanity-plugin-md-notes',
     )
   })
 
   test('https URL without .git suffix', () => {
-    expect(parseGithubRepo('https://github.com/robotostudio/sanity-plugin-help')).toBe(
-      'robotostudio/sanity-plugin-help',
+    expect(parseGithubRepo('https://github.com/robotostudio/sanity-plugin-md-notes')).toBe(
+      'robotostudio/sanity-plugin-md-notes',
     )
   })
 
   test('git+https URL (npm pkg.repository.url shape)', () => {
-    expect(parseGithubRepo('git+https://github.com/robotostudio/sanity-plugin-help.git')).toBe(
-      'robotostudio/sanity-plugin-help',
+    expect(parseGithubRepo('git+https://github.com/robotostudio/sanity-plugin-md-notes.git')).toBe(
+      'robotostudio/sanity-plugin-md-notes',
     )
   })
 
   test('git@ SSH URL', () => {
-    expect(parseGithubRepo('git@github.com:robotostudio/sanity-plugin-help.git')).toBe(
-      'robotostudio/sanity-plugin-help',
+    expect(parseGithubRepo('git@github.com:robotostudio/sanity-plugin-md-notes.git')).toBe(
+      'robotostudio/sanity-plugin-md-notes',
     )
   })
 
   test('github: shorthand', () => {
-    expect(parseGithubRepo('github:robotostudio/sanity-plugin-help')).toBe(
-      'robotostudio/sanity-plugin-help',
+    expect(parseGithubRepo('github:robotostudio/sanity-plugin-md-notes')).toBe(
+      'robotostudio/sanity-plugin-md-notes',
     )
   })
 
@@ -43,9 +43,9 @@ describe('parseGithubRepo', () => {
     expect(
       parseGithubRepo({
         type: 'git',
-        url: 'git+https://github.com/robotostudio/sanity-plugin-help.git',
+        url: 'git+https://github.com/robotostudio/sanity-plugin-md-notes.git',
       }),
-    ).toBe('robotostudio/sanity-plugin-help')
+    ).toBe('robotostudio/sanity-plugin-md-notes')
   })
 
   test('strips trailing path/query/hash', () => {

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /// <reference types="node" />
 /**
- * `sanity-plugin-help` CLI.
+ * `sanity-plugin-md-notes` CLI.
  *
  * Currently exposes one command:
  *
- *     sanity-plugin-help codegen [options]
+ *     sanity-plugin-md-notes codegen [options]
  *
  * Scans a directory for `*.help.md` files and writes a TypeScript module
  * that imports each one and re-exports them as a `helpFiles` object you
@@ -25,10 +25,10 @@ function printHelp(): void {
   // eslint-disable-next-line no-console
   console.log(
     [
-      'sanity-plugin-help — CLI',
+      'sanity-plugin-md-notes — CLI',
       '',
       'Usage:',
-      '  sanity-plugin-help codegen [options]',
+      '  sanity-plugin-md-notes codegen [options]',
       '',
       'Options:',
       '  --in <path>      Directory to scan for *.help.md (default: ./sanity/schemas)',
@@ -37,9 +37,9 @@ function printHelp(): void {
       '  --help, -h       Show this help',
       '',
       'Examples:',
-      '  npx sanity-plugin-help codegen',
-      '  npx sanity-plugin-help codegen --in src/schemas --out src/help-files.ts',
-      '  concurrently "npx sanity-plugin-help codegen --watch" "next dev"',
+      '  npx sanity-plugin-md-notes codegen',
+      '  npx sanity-plugin-md-notes codegen --in src/schemas --out src/help-files.ts',
+      '  concurrently "npx sanity-plugin-md-notes codegen --watch" "next dev"',
     ].join('\n'),
   )
 }
@@ -66,13 +66,13 @@ function logResult(opts: CodegenCliOptions, count: number): void {
   const where = opts.outputFile ?? './sanity/help-files.ts'
   const noun = count === 1 ? 'file' : 'files'
   // eslint-disable-next-line no-console
-  console.log(`[${ts}] [sanity-plugin-help] wrote ${where} (${count} help ${noun})`)
+  console.log(`[${ts}] [sanity-plugin-md-notes] wrote ${where} (${count} help ${noun})`)
 }
 
 function logError(err: unknown): void {
   const message = err instanceof Error ? err.message : String(err)
   // eslint-disable-next-line no-console
-  console.error(`[sanity-plugin-help] codegen failed: ${message}`)
+  console.error(`[sanity-plugin-md-notes] codegen failed: ${message}`)
 }
 
 async function startWatcher(opts: CodegenCliOptions, runOnce: () => void): Promise<void> {
@@ -82,7 +82,7 @@ async function startWatcher(opts: CodegenCliOptions, runOnce: () => void): Promi
   } catch {
     // eslint-disable-next-line no-console
     console.error(
-      `[sanity-plugin-help] --watch requires \`chokidar\` to be installed:\n` +
+      `[sanity-plugin-md-notes] --watch requires \`chokidar\` to be installed:\n` +
         `  npm install --save-dev chokidar`,
     )
     process.exit(1)
@@ -90,7 +90,7 @@ async function startWatcher(opts: CodegenCliOptions, runOnce: () => void): Promi
 
   const watchDir = opts.inputDir ?? './sanity/schemas'
   // eslint-disable-next-line no-console
-  console.log(`[sanity-plugin-help] watching ${watchDir} for *.help.md changes…`)
+  console.log(`[sanity-plugin-md-notes] watching ${watchDir} for *.help.md changes…`)
 
   const watcher = chokidar.watch(watchDir, {
     ignoreInitial: true,
