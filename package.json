@@ -62,7 +62,9 @@
     "lint": "eslint .",
     "prepublishOnly": "pnpm run build",
     "watch": "pkg-utils watch --strict",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@sanity/incompatible-plugin": "^1.0.5",
@@ -91,7 +93,8 @@
     "react-dom": "^19.2.6",
     "sanity": "^5.24.0",
     "styled-components": "^6.4.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   },
   "peerDependencies": {
     "@sanity/icons": "^2 || ^3",
