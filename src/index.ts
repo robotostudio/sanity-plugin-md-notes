@@ -5,8 +5,9 @@ export {helpPlugin, type HelpPluginConfig} from './plugin'
 export {isHelpActive, isHelpEnabled, withHelp} from './schema/with-help'
 
 // Structure helpers
-export {helpDocument} from './structure/help-document'
-export {helpMenuItems} from './structure/help-menu-items'
+export {helpDocument, type HelpDocumentOptions} from './structure/help-document'
+export {helpMenuItems, type HelpMenuItemsOptions} from './structure/help-menu-items'
+export {helpView, type HelpViewOptions} from './structure/help-view'
 export {withHelpDefaultDocumentNode} from './structure/with-help-default-document-node'
 
 // Registry types (for consumers building their own integrations)
