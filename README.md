@@ -658,4 +658,4 @@ function CustomHelpRenderer({schemaType}: {schemaType: string}) {
 
 ## License
 
-[MIT](LICENSE) © [Sameer](https://github.com/SameerJSRS)
+[MIT](LICENSE) © [Sameer](https://github.com/sameerroboto)
