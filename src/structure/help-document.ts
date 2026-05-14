@@ -26,10 +26,7 @@ export interface HelpDocumentOptions {
  *     title: 'English 404 Page',
  *   })
  */
-export function helpDocument(
-  S: StructureBuilder,
-  options: HelpDocumentOptions,
-): DocumentBuilder {
+export function helpDocument(S: StructureBuilder, options: HelpDocumentOptions): DocumentBuilder {
   const {schemaType, documentId, title} = options
   let doc = S.document().schemaType(schemaType).documentId(documentId)
   if (title) doc = doc.title(title)
