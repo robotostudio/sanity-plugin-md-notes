@@ -26,6 +26,8 @@
 import {existsSync, readFileSync, statSync} from 'node:fs'
 import {dirname, join, resolve} from 'node:path'
 
+import {parseGithubRepo} from './parse-github-repo'
+
 const STUB_ID = 'sanity-plugin-help/git-repo'
 const RESOLVED_ID = '\0sanity-plugin-help:git-repo'
 
@@ -76,25 +78,6 @@ function readOriginUrl(gitDir: string): string | null {
   if (!sectionMatch || !sectionMatch[1]) return null
   const urlMatch = sectionMatch[1].match(/^\s*url\s*=\s*(.+)$/m)
   return urlMatch && urlMatch[1] ? urlMatch[1].trim() : null
-}
-
-function parseGithubRepo(input: string | {url?: string} | null | undefined): string | null {
-  if (!input) return null
-  const raw = typeof input === 'string' ? input : input.url
-  if (!raw || typeof raw !== 'string') return null
-  const cleaned = raw
-    .trim()
-    .replace(/^git\+/, '')
-    .replace(/\.git$/, '')
-  const ghShort = cleaned.match(/^github:([\w.-]+)\/([\w.-]+)$/i)
-  if (ghShort) return `${ghShort[1]}/${ghShort[2]}`
-  const ghUrl = cleaned.match(/github\.com[:/]([\w.-]+)\/([\w.-]+?)(?:[/?#]|$)/i)
-  if (ghUrl) return `${ghUrl[1]}/${ghUrl[2]}`
-  const plain = cleaned.match(/^([\w.-]+)\/([\w.-]+)$/)
-  if (plain && !cleaned.includes('://') && !cleaned.includes('@')) {
-    return `${plain[1]}/${plain[2]}`
-  }
-  return null
 }
 
 interface MinimalVitePlugin {

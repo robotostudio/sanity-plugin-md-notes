@@ -2,6 +2,7 @@
  * Help content registry. Built once at plugin init from the file map the
  * consumer passes in (Vite `import.meta.glob` or Webpack `require.context`).
  */
+import {parseGithubRepo} from './parse-github-repo'
 
 export interface HelpEntry {
   content: string
@@ -69,35 +70,6 @@ function parseFrontmatter(raw: string): {
   const body = match[2] ?? ''
   const lu = meta.match(/^\s*lastUpdated:\s*['"]?([^'"\s]+)['"]?\s*$/m)
   return {body, lastUpdated: lu ? lu[1] : null}
-}
-
-/**
- * Normalises a wide range of repo identifiers into an `owner/repo` string.
- * Returns null when nothing recognisable is found — the footer link is then
- * suppressed instead of pointing at a broken URL.
- */
-function parseGithubRepo(
-  input: string | {url?: string; type?: string} | null | undefined,
-): string | null {
-  if (!input) return null
-  const raw = typeof input === 'string' ? input : input.url
-  if (!raw || typeof raw !== 'string') return null
-  const cleaned = raw
-    .trim()
-    .replace(/^git\+/, '')
-    .replace(/\.git$/, '')
-  // github:owner/repo shorthand
-  const ghShort = cleaned.match(/^github:([\w.-]+)\/([\w.-]+)$/i)
-  if (ghShort) return `${ghShort[1]}/${ghShort[2]}`
-  // any URL containing github.com — covers https://, git://, ssh://, git@host:owner/repo
-  const ghUrl = cleaned.match(/github\.com[:/]([\w.-]+)\/([\w.-]+?)(?:[/?#]|$)/i)
-  if (ghUrl) return `${ghUrl[1]}/${ghUrl[2]}`
-  // plain `owner/repo` (no scheme, no `@`, exactly one slash)
-  const plain = cleaned.match(/^([\w.-]+)\/([\w.-]+)$/)
-  if (plain && !cleaned.includes('://') && !cleaned.includes('@')) {
-    return `${plain[1]}/${plain[2]}`
-  }
-  return null
 }
 
 let registry: Record<string, HelpEntry> = {}
