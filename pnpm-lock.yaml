@@ -42,6 +42,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.59.3
         version: 8.59.3(eslint@8.57.1)(typescript@6.0.3)
+      chokidar:
+        specifier: ^5.0.0
+        version: 5.0.0
       eslint:
         specifier: ^8.57.1
         version: 8.57.1

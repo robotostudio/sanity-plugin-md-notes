@@ -13,40 +13,56 @@
   "license": "MIT",
   "author": "Sameerroboto <sameer@robotostudio.com>",
   "sideEffects": false,
-  "type": "commonjs",
+  "type": "module",
   "exports": {
     ".": {
       "source": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./vite": {
       "source": "./src/vite.ts",
-      "import": "./dist/vite.mjs",
-      "default": "./dist/vite.js"
+      "import": "./dist/vite.js",
+      "require": "./dist/vite.cjs"
     },
     "./git-repo": {
       "source": "./src/git-repo.ts",
-      "import": "./dist/git-repo.mjs",
-      "default": "./dist/git-repo.js"
+      "import": "./dist/git-repo.js",
+      "require": "./dist/git-repo.cjs"
+    },
+    "./codegen": {
+      "source": "./src/codegen.ts",
+      "import": "./dist/codegen.js",
+      "require": "./dist/codegen.cjs"
+    },
+    "./cli": {
+      "source": "./src/cli.ts",
+      "import": "./dist/cli.js",
+      "require": "./dist/cli.cjs"
     },
     "./package.json": "./package.json"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "sanity-plugin-help": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "sanity.json",
     "src",
     "v2-incompatible.js"
   ],
+  "browserslist": "extends @sanity/browserslist-config",
   "scripts": {
     "build": "plugin-kit verify-package --silent && pkg-utils build --strict --check --clean",
     "format": "prettier --write --cache --ignore-unknown .",
     "link-watch": "plugin-kit link-watch",
     "lint": "eslint .",
     "prepublishOnly": "pnpm run build",
-    "watch": "pkg-utils watch --strict"
+    "watch": "pkg-utils watch --strict",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@sanity/incompatible-plugin": "^1.0.5",
@@ -62,6 +78,7 @@
     "@types/react": "^19.2.14",
     "@typescript-eslint/eslint-plugin": "^8.59.3",
     "@typescript-eslint/parser": "^8.59.3",
+    "chokidar": "^5.0.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-sanity": "^7.1.4",
@@ -79,10 +96,41 @@
   "peerDependencies": {
     "@sanity/icons": "^2 || ^3",
     "@sanity/ui": "^1 || ^2 || ^3",
+    "chokidar": "^3 || ^4 || ^5",
     "react": "^18 || ^19",
     "sanity": "^3 || ^4 || ^5"
   },
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./vite": {
+        "import": "./dist/vite.js",
+        "require": "./dist/vite.cjs"
+      },
+      "./git-repo": {
+        "import": "./dist/git-repo.js",
+        "require": "./dist/git-repo.cjs"
+      },
+      "./codegen": {
+        "import": "./dist/codegen.js",
+        "require": "./dist/codegen.cjs"
+      },
+      "./cli": {
+        "import": "./dist/cli.js",
+        "require": "./dist/cli.cjs"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "peerDependenciesMeta": {
+    "chokidar": {
+      "optional": true
+    }
   }
 }
