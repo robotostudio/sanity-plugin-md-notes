@@ -1,48 +1,86 @@
 {
-  "name": "sanity-plugin-help",
+  "name": "sanity-plugin-md-notes",
   "version": "1.0.0",
-  "description": "For this this a temporary description",
+  "description": "Drop a `<schemaName>.help.md` next to a Sanity schema and editors get a native Help inspector + view tab in Studio.",
   "keywords": [
     "sanity",
-    "sanity-plugin"
+    "sanity-plugin",
+    "help",
+    "documentation",
+    "markdown",
+    "inspector"
   ],
   "license": "MIT",
   "author": "Sameerroboto <sameer@robotostudio.com>",
   "sideEffects": false,
-  "type": "commonjs",
+  "type": "module",
   "exports": {
     ".": {
       "source": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./vite": {
+      "source": "./src/vite.ts",
+      "import": "./dist/vite.js",
+      "require": "./dist/vite.cjs"
+    },
+    "./git-repo": {
+      "source": "./src/git-repo.ts",
+      "import": "./dist/git-repo.js",
+      "require": "./dist/git-repo.cjs"
+    },
+    "./codegen": {
+      "source": "./src/codegen.ts",
+      "import": "./dist/codegen.js",
+      "require": "./dist/codegen.cjs"
+    },
+    "./cli": {
+      "source": "./src/cli.ts",
+      "import": "./dist/cli.js",
+      "require": "./dist/cli.cjs"
     },
     "./package.json": "./package.json"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "sanity-plugin-md-notes": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "sanity.json",
     "src",
     "v2-incompatible.js"
   ],
+  "browserslist": "extends @sanity/browserslist-config",
   "scripts": {
     "build": "plugin-kit verify-package --silent && pkg-utils build --strict --check --clean",
     "format": "prettier --write --cache --ignore-unknown .",
     "link-watch": "plugin-kit link-watch",
     "lint": "eslint .",
-    "prepublishOnly": "npm run build",
-    "watch": "pkg-utils watch --strict"
+    "prepublishOnly": "pnpm run build",
+    "watch": "pkg-utils watch --strict",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@sanity/incompatible-plugin": "^1.0.5"
+    "@sanity/incompatible-plugin": "^1.0.5",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@sanity/icons": "^3.7.0",
     "@sanity/pkg-utils": "^10.4.18",
     "@sanity/plugin-kit": "^4.0.20",
+    "@sanity/ui": "^3.1.11",
+    "@types/node": "^25.7.0",
     "@types/react": "^19.2.14",
     "@typescript-eslint/eslint-plugin": "^8.59.3",
     "@typescript-eslint/parser": "^8.59.3",
+    "chokidar": "^5.0.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-sanity": "^7.1.4",
@@ -55,13 +93,47 @@
     "react-dom": "^19.2.6",
     "sanity": "^5.24.0",
     "styled-components": "^6.4.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   },
   "peerDependencies": {
-    "react": "^18",
-    "sanity": "^3"
+    "@sanity/icons": "^2 || ^3",
+    "@sanity/ui": "^1 || ^2 || ^3",
+    "chokidar": "^3 || ^4 || ^5",
+    "react": "^18 || ^19",
+    "sanity": "^3 || ^4 || ^5"
   },
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./vite": {
+        "import": "./dist/vite.js",
+        "require": "./dist/vite.cjs"
+      },
+      "./git-repo": {
+        "import": "./dist/git-repo.js",
+        "require": "./dist/git-repo.cjs"
+      },
+      "./codegen": {
+        "import": "./dist/codegen.js",
+        "require": "./dist/codegen.cjs"
+      },
+      "./cli": {
+        "import": "./dist/cli.js",
+        "require": "./dist/cli.cjs"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "peerDependenciesMeta": {
+    "chokidar": {
+      "optional": true
+    }
   }
 }
