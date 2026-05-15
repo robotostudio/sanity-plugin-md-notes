@@ -41,6 +41,13 @@ export function withHelpDefaultDocumentNode(
     const existingViews =
       typeof builderWithViews.getViews === 'function' ? builderWithViews.getViews() : null
     if (existingViews && existingViews.length > 0) {
+      // If the base resolver already injected a Help view, don't duplicate it.
+      const hasHelpView = existingViews.some(
+        (view) =>
+          typeof (view as {getId?: () => string}).getId === 'function' &&
+          (view as {getId: () => string}).getId() === 'help',
+      )
+      if (hasHelpView) return baseNode
       return baseNode.views([...existingViews, helpView] as Parameters<typeof baseNode.views>[0])
     }
     return baseNode.views([S.view.form(), helpView])

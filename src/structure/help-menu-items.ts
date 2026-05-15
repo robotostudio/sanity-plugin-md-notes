@@ -27,7 +27,8 @@ export interface HelpMenuItemsOptions {
 /**
  * Returns a list-pane menu item that opens the help dialog for `schemaType`,
  * plus the schema's default ordering menu items if a structure context is
- * passed. Returns an empty array when help is not active for the schema.
+ * passed. When help is not active for the schema, returns the default
+ * ordering items if `context` was provided, otherwise an empty array.
  *
  * Calling `.menuItems([...])` on a list pane REPLACES the default sort
  * options that Sanity would otherwise build from the schema's `orderings`,
