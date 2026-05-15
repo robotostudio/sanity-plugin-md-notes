@@ -37,7 +37,7 @@ export function parseGithubRepo(
   // so plain `github.com/owner/repo` still matches, but lookalikes like
   // `notgithub.com` or `github.com.evil.com` correctly fail.
   const ghUrl = cleaned.match(
-    /^(?:(?:https?|ssh|git):\/\/(?:[^@/\s]+@)?|git@)?github\.com[:/]([\w.-]+)\/([\w.-]+?)(?:[/?#]|$)/i,
+    /^(?:(?:https?|ssh|git):\/\/(?:[^@/\s]+@)?|git@)?github\.com[:/]([\w.-]+)\/([\w.-]+?)(?:\.git)?(?:[/?#]|$)/i,
   )
   if (ghUrl) return `${ghUrl[1]}/${ghUrl[2]}`
 

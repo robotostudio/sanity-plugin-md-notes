@@ -54,6 +54,12 @@ describe('parseGithubRepo', () => {
     expect(parseGithubRepo('https://github.com/org/repo#readme')).toBe('org/repo')
   })
 
+  test('strips .git suffix even with trailing hash/query/path', () => {
+    expect(parseGithubRepo('https://github.com/org/repo.git#readme')).toBe('org/repo')
+    expect(parseGithubRepo('https://github.com/org/repo.git?foo=bar')).toBe('org/repo')
+    expect(parseGithubRepo('https://github.com/org/repo.git/tree/main')).toBe('org/repo')
+  })
+
   test('non-GitHub URL returns null', () => {
     expect(parseGithubRepo('https://gitlab.com/org/repo')).toBeNull()
     expect(parseGithubRepo('https://bitbucket.org/org/repo')).toBeNull()
