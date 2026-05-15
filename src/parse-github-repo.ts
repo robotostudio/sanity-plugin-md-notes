@@ -32,9 +32,13 @@ export function parseGithubRepo(
   const ghShort = cleaned.match(/^github:([\w.-]+)\/([\w.-]+)$/i)
   if (ghShort) return `${ghShort[1]}/${ghShort[2]}`
 
-  // any URL containing github.com — covers https://, git://, ssh://,
-  // and `git@github.com:owner/repo` SCP-style
-  const ghUrl = cleaned.match(/github\.com[:/]([\w.-]+)\/([\w.-]+?)(?:[/?#]|$)/i)
+  // Real github.com hosts only — covers https://, git://, ssh://, and the
+  // `git@github.com:owner/repo` SCP-style. The protocol prefix is optional
+  // so plain `github.com/owner/repo` still matches, but lookalikes like
+  // `notgithub.com` or `github.com.evil.com` correctly fail.
+  const ghUrl = cleaned.match(
+    /^(?:(?:https?|ssh|git):\/\/(?:[^@/\s]+@)?|git@)?github\.com[:/]([\w.-]+)\/([\w.-]+?)(?:[/?#]|$)/i,
+  )
   if (ghUrl) return `${ghUrl[1]}/${ghUrl[2]}`
 
   // plain `owner/repo` (no scheme, no `@`, exactly one slash)

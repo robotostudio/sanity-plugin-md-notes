@@ -59,6 +59,11 @@ describe('parseGithubRepo', () => {
     expect(parseGithubRepo('https://bitbucket.org/org/repo')).toBeNull()
   })
 
+  test('lookalike hostnames containing github.com return null', () => {
+    expect(parseGithubRepo('https://notgithub.com/org/repo')).toBeNull()
+    expect(parseGithubRepo('https://github.com.evil.com/org/repo')).toBeNull()
+  })
+
   test('falsy / invalid input returns null', () => {
     expect(parseGithubRepo(null)).toBeNull()
     expect(parseGithubRepo(undefined)).toBeNull()
