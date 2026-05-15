@@ -1,6 +1,6 @@
-import {describe, expect, test} from 'vitest'
+import { describe, expect, test } from 'vitest'
 
-import {parseGithubRepo} from './parse-github-repo'
+import { parseGithubRepo } from './parse-github-repo'
 
 describe('parseGithubRepo', () => {
   test('owner/repo shorthand', () => {
@@ -69,7 +69,7 @@ describe('parseGithubRepo', () => {
     expect(parseGithubRepo(undefined)).toBeNull()
     expect(parseGithubRepo('')).toBeNull()
     expect(parseGithubRepo({})).toBeNull()
-    expect(parseGithubRepo({url: ''})).toBeNull()
+    expect(parseGithubRepo({ url: '' })).toBeNull()
   })
 
   test('owner/repo names with dots, dashes, underscores', () => {

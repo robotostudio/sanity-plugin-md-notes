@@ -1,7 +1,7 @@
-import type {ReactElement} from 'react'
-import type {LayoutProps} from 'sanity'
+import type { ReactElement } from 'react'
+import type { LayoutProps } from 'sanity'
 
-import {HelpDialogProvider} from './help-dialog-provider'
+import { HelpDialogProvider } from './help-dialog-provider'
 
 /**
  * Studio layout wrapper. Mounts the HelpDialogProvider once at the studio

@@ -18,7 +18,7 @@
  * have two slightly-different copies of.
  */
 export function parseGithubRepo(
-  input: string | {url?: string; type?: string} | null | undefined,
+  input: string | { url?: string; type?: string } | null | undefined,
 ): string | null {
   if (!input) return null
   const raw = typeof input === 'string' ? input : input.url

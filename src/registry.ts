@@ -2,7 +2,7 @@
  * Help content registry. Built once at plugin init from the file map the
  * consumer passes in (Vite `import.meta.glob` or Webpack `require.context`).
  */
-import {parseGithubRepo} from './parse-github-repo'
+import { parseGithubRepo } from './parse-github-repo'
 
 export interface HelpEntry {
   content: string
@@ -45,7 +45,7 @@ export interface HelpRegistryOptions {
    *     import pkg from './package.json'
    *     helpPlugin({ files, githubRepo: pkg.repository })
    */
-  githubRepo?: string | {url?: string; type?: string} | null
+  githubRepo?: string | { url?: string; type?: string } | null
 
   /**
    * Branch the GitHub link should point at. Defaults to `main`.
@@ -65,18 +65,18 @@ function parseFrontmatter(raw: string): {
   lastUpdated: string | null
 } {
   const match = raw.match(/^---\r?\n([\s\S]+?)\r?\n---\r?\n([\s\S]*)$/)
-  if (!match) return {body: raw, lastUpdated: null}
+  if (!match) return { body: raw, lastUpdated: null }
   const meta = match[1] ?? ''
   const body = match[2] ?? ''
   const lu = meta.match(/^\s*lastUpdated:\s*['"]?([^'"\s]+)['"]?\s*$/m)
-  return {body, lastUpdated: lu ? lu[1] : null}
+  return { body, lastUpdated: lu ? lu[1] : null }
 }
 
 let registry: Record<string, HelpEntry> = {}
 let editUrlBase: string | null = null
 
 export function initHelpRegistry(options: HelpRegistryOptions): void {
-  const {files, githubRepo, branch = 'main', basePath} = options
+  const { files, githubRepo, branch = 'main', basePath } = options
   registry = {}
   const repo = parseGithubRepo(githubRepo)
   editUrlBase = repo ? `https://github.com/${repo}/blob/${branch}` : null
@@ -85,11 +85,11 @@ export function initHelpRegistry(options: HelpRegistryOptions): void {
     if (typeof raw !== 'string') continue
     const match = path.match(/([^/\\]+)\.help\.md$/)
     if (!match || !match[1]) continue
-    const {body, lastUpdated} = parseFrontmatter(raw)
+    const { body, lastUpdated } = parseFrontmatter(raw)
     const sourcePath = basePath
       ? path.replace(new RegExp(`^${basePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`), '')
       : path.replace(/^\.\.?\//, '')
-    registry[match[1]] = {content: body, lastUpdated, sourcePath}
+    registry[match[1]] = { content: body, lastUpdated, sourcePath }
   }
 }
 

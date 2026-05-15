@@ -1,8 +1,8 @@
-import type {DocumentBuilder, StructureBuilder} from 'sanity/structure'
+import type { DocumentBuilder, StructureBuilder } from 'sanity/structure'
 
-import {HelpIcon} from '../components/help-icon'
-import {HelpView} from '../components/help-view'
-import {isHelpActive} from '../schema/with-help'
+import { HelpIcon } from '../components/help-icon'
+import { HelpView } from '../components/help-view'
+import { isHelpActive } from '../schema/with-help'
 
 export interface HelpDocumentOptions {
   /** Schema type of the singleton document. */
@@ -27,7 +27,7 @@ export interface HelpDocumentOptions {
  *   })
  */
 export function helpDocument(S: StructureBuilder, options: HelpDocumentOptions): DocumentBuilder {
-  const {schemaType, documentId, title} = options
+  const { schemaType, documentId, title } = options
   let doc = S.document().schemaType(schemaType).documentId(documentId)
   if (title) doc = doc.title(title)
   if (isHelpActive(schemaType)) {

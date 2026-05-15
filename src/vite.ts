@@ -23,10 +23,10 @@
  * consumers will get the `null` stub; pass `githubRepo: pkg.repository` on
  * `helpPlugin` manually instead.
  */
-import {existsSync, readFileSync, statSync} from 'node:fs'
-import {dirname, join, resolve} from 'node:path'
+import { existsSync, readFileSync, statSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
 
-import {parseGithubRepo} from './parse-github-repo'
+import { parseGithubRepo } from './parse-github-repo'
 
 const STUB_ID = 'sanity-plugin-md-notes/git-repo'
 const RESOLVED_ID = '\0sanity-plugin-md-notes:git-repo'
@@ -44,7 +44,7 @@ export interface SanityHelpViteOptions {
    * Skip git detection and use this value as-is. Accepts the same shapes as
    * `helpPlugin`'s `githubRepo` option (shorthand, URL, or `{url}` object).
    */
-  override?: string | {url?: string} | null
+  override?: string | { url?: string } | null
 }
 
 // EACCES, transient FS errors, malformed worktree state — return null so
@@ -96,7 +96,7 @@ function readOriginUrl(gitDir: string): string | null {
 interface MinimalVitePlugin {
   name: string
   enforce?: 'pre' | 'post'
-  config?: () => {optimizeDeps?: {exclude?: string[]}}
+  config?: () => { optimizeDeps?: { exclude?: string[] } }
   configResolved?: () => void
   resolveId?: (id: string) => string | null | undefined
   load?: (id: string) => string | null | undefined
@@ -112,7 +112,7 @@ export function sanityHelpVite(options: SanityHelpViteOptions = {}): MinimalVite
       // Vite pre-bundles npm deps before plugins run; without this exclude,
       // `sanity-plugin-md-notes/git-repo` would be resolved to the null stub
       // before our resolveId hook gets a chance to intercept it.
-      return {optimizeDeps: {exclude: [STUB_ID]}}
+      return { optimizeDeps: { exclude: [STUB_ID] } }
     },
     configResolved() {
       if (options.override !== undefined) {

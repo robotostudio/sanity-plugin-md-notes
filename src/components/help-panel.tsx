@@ -1,9 +1,9 @@
-import {LaunchIcon} from '@sanity/icons'
-import {Box, Card, Flex, Stack, Text} from '@sanity/ui'
-import type {ReactElement} from 'react'
+import { LaunchIcon } from '@sanity/icons'
+import { Box, Card, Flex, Stack, Text } from '@sanity/ui'
+import type { ReactElement } from 'react'
 
-import {getEditUrl, type HelpEntry} from '../registry'
-import {MarkdownRenderer} from './markdown-renderer'
+import { getEditUrl, type HelpEntry } from '../registry'
+import { MarkdownRenderer } from './markdown-renderer'
 
 function formatDate(iso: string | null): string | null {
   if (!iso) return null
@@ -16,19 +16,19 @@ function formatDate(iso: string | null): string | null {
   })
 }
 
-export function HelpPanel({entry}: {entry: HelpEntry}): ReactElement {
+export function HelpPanel({ entry }: { entry: HelpEntry }): ReactElement {
   const lastUpdated = formatDate(entry.lastUpdated)
   const editUrl = getEditUrl(entry)
 
   return (
-    <Flex direction="column" height="fill" style={{minHeight: 0, height: '100%'}}>
+    <Flex direction="column" height="fill" style={{ minHeight: 0, height: '100%' }}>
       <Box flex={1} overflow="auto" padding={4}>
-        <Box style={{maxWidth: 640, margin: '0 auto'}}>
+        <Box style={{ maxWidth: 640, margin: '0 auto' }}>
           <MarkdownRenderer content={entry.content} />
         </Box>
       </Box>
-      <Card paddingX={4} paddingY={3} tone="transparent" borderTop style={{flexShrink: 0}}>
-        <Box style={{maxWidth: 640, margin: '0 auto'}}>
+      <Card paddingX={4} paddingY={3} tone="transparent" borderTop style={{ flexShrink: 0 }}>
+        <Box style={{ maxWidth: 640, margin: '0 auto' }}>
           <Flex align="center" justify="space-between" gap={3} wrap="wrap">
             <Text size={0} muted>
               {lastUpdated ? `Last updated: ${lastUpdated}` : 'No update date set'}
@@ -48,10 +48,10 @@ export function HelpPanel({entry}: {entry: HelpEntry}): ReactElement {
                     textDecoration: 'none',
                   }}
                 >
-                  <span style={{textDecoration: 'underline', textUnderlineOffset: 2}}>
+                  <span style={{ textDecoration: 'underline', textUnderlineOffset: 2 }}>
                     Edit on GitHub
                   </span>
-                  <LaunchIcon style={{fontSize: '1.15em'}} />
+                  <LaunchIcon style={{ fontSize: '1.15em' }} />
                 </a>
               </Text>
             ) : null}
@@ -62,7 +62,7 @@ export function HelpPanel({entry}: {entry: HelpEntry}): ReactElement {
   )
 }
 
-export function HelpPanelEmpty({schemaType}: {schemaType: string}): ReactElement {
+export function HelpPanelEmpty({ schemaType }: { schemaType: string }): ReactElement {
   return (
     <Box padding={4}>
       <Stack space={3}>

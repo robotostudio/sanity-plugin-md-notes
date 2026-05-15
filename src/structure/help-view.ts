@@ -1,8 +1,8 @@
-import type {StructureBuilder, ViewBuilder} from 'sanity/structure'
+import type { StructureBuilder, ViewBuilder } from 'sanity/structure'
 
-import {HelpIcon} from '../components/help-icon'
-import {HelpView} from '../components/help-view'
-import {isHelpActive} from '../schema/with-help'
+import { HelpIcon } from '../components/help-icon'
+import { HelpView } from '../components/help-view'
+import { isHelpActive } from '../schema/with-help'
 
 export interface HelpViewOptions {
   /** Schema type the help tab is being injected into. */

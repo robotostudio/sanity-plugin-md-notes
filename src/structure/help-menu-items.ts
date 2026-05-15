@@ -7,9 +7,9 @@ import {
   type StructureResolverContext,
 } from 'sanity/structure'
 
-import {openHelpDialog} from '../components/help-dialog-store'
-import {HelpIcon} from '../components/help-icon'
-import {isHelpActive} from '../schema/with-help'
+import { openHelpDialog } from '../components/help-dialog-store'
+import { HelpIcon } from '../components/help-icon'
+import { isHelpActive } from '../schema/with-help'
 
 export interface HelpMenuItemsOptions {
   /** Schema type the Help item is being added for. */
@@ -49,7 +49,7 @@ export function helpMenuItems(
   S: StructureBuilder,
   options: HelpMenuItemsOptions,
 ): (MenuItem | MenuItemBuilder)[] {
-  const {schemaType, context} = options
+  const { schemaType, context } = options
   // `getOrderingMenuItemsForSchemaType` is typed as `StructureContext` upstream
   // but only reads `context.schema` — and `StructureResolverContext` already
   // provides that. The cast is safe and matches what every

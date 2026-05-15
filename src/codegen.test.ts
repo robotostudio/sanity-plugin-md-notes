@@ -1,10 +1,10 @@
-import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs'
-import {tmpdir} from 'node:os'
-import {join} from 'node:path'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
-import {afterEach, beforeEach, describe, expect, test} from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
-import {generateHelpFiles} from './codegen'
+import { generateHelpFiles } from './codegen'
 
 let workDir: string
 
@@ -13,12 +13,12 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  rmSync(workDir, {recursive: true, force: true})
+  rmSync(workDir, { recursive: true, force: true })
 })
 
 function writeHelp(relativePath: string, content = '# placeholder\n'): void {
   const full = join(workDir, relativePath)
-  mkdirSync(join(full, '..'), {recursive: true})
+  mkdirSync(join(full, '..'), { recursive: true })
   writeFileSync(full, content, 'utf8')
 }
 

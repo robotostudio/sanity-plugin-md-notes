@@ -7,7 +7,7 @@ import {
   ErrorOutlineIcon,
   WarningOutlineIcon,
 } from '@sanity/icons'
-import {Box, Card, Flex, Text} from '@sanity/ui'
+import { Box, Card, Flex, Text } from '@sanity/ui'
 import React, {
   Children,
   type ComponentType,
@@ -21,7 +21,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import ReactMarkdown, {type Components} from 'react-markdown'
+import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 /**
@@ -160,7 +160,7 @@ interface MdastNode {
   value?: string
   meta?: string
   children?: MdastNode[]
-  data?: {hProperties?: Record<string, unknown>}
+  data?: { hProperties?: Record<string, unknown> }
 }
 
 /**
@@ -239,7 +239,7 @@ function getTextFromChildren(children: ReactNode): string {
   if (typeof children === 'string' || typeof children === 'number') return String(children)
   if (Array.isArray(children)) return children.map(getTextFromChildren).join('')
   if (isValidElement(children)) {
-    const props = children.props as {children?: ReactNode}
+    const props = children.props as { children?: ReactNode }
     return getTextFromChildren(props.children)
   }
   return ''
@@ -257,7 +257,7 @@ function slugify(text: string): string {
 
 // --- Heading with anchor link -----------------------------------------
 
-function HeadingAnchor({slug}: {slug: string}) {
+function HeadingAnchor({ slug }: { slug: string }) {
   const onClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (event.metaKey || event.ctrlKey || event.shiftKey) return
@@ -268,7 +268,7 @@ function HeadingAnchor({slug}: {slug: string}) {
       url.hash = slug
       window.history.replaceState(null, '', url.toString())
       const target = document.getElementById(slug)
-      if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'})
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
     },
     [slug],
   )
@@ -289,7 +289,7 @@ function makeHeading(
   style: CSSProperties,
 ): Components[`h${typeof level}`] {
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-  const Heading: Components[`h${typeof level}`] = ({children}) => {
+  const Heading: Components[`h${typeof level}`] = ({ children }) => {
     const text = getTextFromChildren(children)
     const slug = slugify(text)
     return (
@@ -317,7 +317,7 @@ function getCodeTitle(children: ReactNode): string | undefined {
   return title
 }
 
-function CodeBlock({children}: {children?: ReactNode}) {
+function CodeBlock({ children }: { children?: ReactNode }) {
   const title = getCodeTitle(children)
   const scrollRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -368,7 +368,7 @@ function CodeBlock({children}: {children?: ReactNode}) {
       border
       tone="transparent"
       className="help-md-codeblock"
-      style={{margin: '0 0 1rem', overflow: 'hidden'}}
+      style={{ margin: '0 0 1rem', overflow: 'hidden' }}
     >
       {title ? (
         <Flex
@@ -392,12 +392,12 @@ function CodeBlock({children}: {children?: ReactNode}) {
           >
             <DocumentIcon />
           </span>
-          <Text size={2} muted style={{fontFamily: MONO_FONT, lineHeight: 1}}>
+          <Text size={2} muted style={{ fontFamily: MONO_FONT, lineHeight: 1 }}>
             {title}
           </Text>
         </Flex>
       ) : null}
-      <div style={{position: 'relative'}}>
+      <div style={{ position: 'relative' }}>
         <button
           type="button"
           onClick={onCopy}
@@ -436,18 +436,18 @@ const ADMONITIONS: Record<
     tone: 'primary' | 'positive' | 'caution' | 'critical'
   }
 > = {
-  note: {label: 'Note', icon: null, tone: 'primary'},
-  tip: {label: 'Tip', icon: BulbOutlineIcon, tone: 'positive'},
-  important: {label: 'Important', icon: BellIcon, tone: 'primary'},
-  warning: {label: 'Warning', icon: WarningOutlineIcon, tone: 'caution'},
-  caution: {label: 'Caution', icon: ErrorOutlineIcon, tone: 'critical'},
+  note: { label: 'Note', icon: null, tone: 'primary' },
+  tip: { label: 'Tip', icon: BulbOutlineIcon, tone: 'positive' },
+  important: { label: 'Important', icon: BellIcon, tone: 'primary' },
+  warning: { label: 'Warning', icon: WarningOutlineIcon, tone: 'caution' },
+  caution: { label: 'Caution', icon: ErrorOutlineIcon, tone: 'critical' },
 }
 
-function Admonition({type, children}: {type: AdmonitionType; children?: ReactNode}) {
+function Admonition({ type, children }: { type: AdmonitionType; children?: ReactNode }) {
   const config = ADMONITIONS[type]
   const Icon = config.icon
   const body = (
-    <div className="help-md-admonition-body" style={{flex: 1, minWidth: 0}}>
+    <div className="help-md-admonition-body" style={{ flex: 1, minWidth: 0 }}>
       {children}
     </div>
   )
@@ -458,7 +458,7 @@ function Admonition({type, children}: {type: AdmonitionType; children?: ReactNod
       tone={config.tone}
       role="note"
       aria-label={Icon ? undefined : config.label}
-      style={{margin: '0 0 1rem'}}
+      style={{ margin: '0 0 1rem' }}
     >
       {Icon ? (
         <Flex align="flex-start" gap={3}>
@@ -550,7 +550,7 @@ interface Embed {
 function detectVideoEmbed(url: string): Embed | null {
   for (const p of videoProviders) {
     const embedUrl = p.toEmbed(url)
-    if (embedUrl) return {provider: p.name, embedUrl}
+    if (embedUrl) return { provider: p.name, embedUrl }
   }
   return null
 }
@@ -560,7 +560,7 @@ function findBareVideoLink(children: React.ReactNode): Embed | null {
   if (arr.length !== 1) return null
   const only = arr[0]
   if (!isValidElement(only)) return null
-  const props = only.props as {href?: string; children?: React.ReactNode}
+  const props = only.props as { href?: string; children?: React.ReactNode }
   const href = props.href
   if (typeof href !== 'string') return null
   const linkChildren = Children.toArray(props.children)
@@ -570,7 +570,7 @@ function findBareVideoLink(children: React.ReactNode): Embed | null {
   return detectVideoEmbed(href)
 }
 
-function VideoEmbed({provider, embedUrl}: Embed) {
+function VideoEmbed({ provider, embedUrl }: Embed) {
   return (
     <div
       style={{
@@ -609,9 +609,9 @@ function VideoEmbed({provider, embedUrl}: Embed) {
 
 // --- Inline + block <code> renderer ------------------------------------
 
-type CodeProps = {children?: ReactNode} & Record<string, unknown>
+type CodeProps = { children?: ReactNode } & Record<string, unknown>
 
-function CodeRenderer({children, ...rest}: CodeProps): React.ReactElement {
+function CodeRenderer({ children, ...rest }: CodeProps): React.ReactElement {
   const inPre = useContext(InPreContext)
   if (inPre) {
     // Inside a fenced block — render plain so the outer CodeBlock controls styling
@@ -632,32 +632,32 @@ const components: Components = {
   h4: makeHeading(4, styles.h4!),
   h5: makeHeading(5, styles.h5!),
   h6: makeHeading(6, styles.h6!),
-  p: ({children}) => {
+  p: ({ children }) => {
     const embed = findBareVideoLink(children)
     if (embed) return <VideoEmbed {...embed} />
     return <p style={styles.p}>{children}</p>
   },
-  strong: ({children}) => <strong style={{fontWeight: 600}}>{children}</strong>,
-  em: ({children}) => <em>{children}</em>,
-  del: ({children}) => <del>{children}</del>,
-  ul: ({children}) => <ul style={styles.ul}>{children}</ul>,
-  ol: ({children}) => <ol style={styles.ol}>{children}</ol>,
-  li: ({children}) => <li style={styles.li}>{children}</li>,
+  strong: ({ children }) => <strong style={{ fontWeight: 600 }}>{children}</strong>,
+  em: ({ children }) => <em>{children}</em>,
+  del: ({ children }) => <del>{children}</del>,
+  ul: ({ children }) => <ul style={styles.ul}>{children}</ul>,
+  ol: ({ children }) => <ol style={styles.ol}>{children}</ol>,
+  li: ({ children }) => <li style={styles.li}>{children}</li>,
   code: (props) => <CodeRenderer {...props} />,
-  pre: ({children}) => <CodeBlock>{children}</CodeBlock>,
-  a: ({href, children}) => {
+  pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
+  a: ({ href, children }) => {
     const isExternal = !!href && /^https?:\/\//i.test(href)
     return (
       <a
         href={href}
         style={styles.link}
-        {...(isExternal ? {target: '_blank', rel: 'noopener noreferrer'} : {})}
+        {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       >
         {children}
       </a>
     )
   },
-  blockquote: ({children, ...rest}) => {
+  blockquote: ({ children, ...rest }) => {
     const admonitionType = (rest as Record<string, unknown>)['data-admonition']
     if (typeof admonitionType === 'string' && admonitionType in ADMONITIONS) {
       return <Admonition type={admonitionType as AdmonitionType}>{children}</Admonition>
@@ -678,7 +678,7 @@ const components: Components = {
     )
   },
   hr: () => <hr style={styles.hr} />,
-  img: ({src, alt}) => (
+  img: ({ src, alt }) => (
     <img
       src={typeof src === 'string' ? src : undefined}
       alt={alt ?? ''}
@@ -690,16 +690,16 @@ const components: Components = {
       }}
     />
   ),
-  table: ({children}) => (
+  table: ({ children }) => (
     <Box overflow="auto" style={styles.tableWrap}>
       <table style={styles.table}>{children}</table>
     </Box>
   ),
-  thead: ({children}) => <thead>{children}</thead>,
-  tbody: ({children}) => <tbody>{children}</tbody>,
-  tr: ({children}) => <tr>{children}</tr>,
-  th: ({children}) => <th style={styles.th}>{children}</th>,
-  td: ({children}) => <td style={styles.td}>{children}</td>,
+  thead: ({ children }) => <thead>{children}</thead>,
+  tbody: ({ children }) => <tbody>{children}</tbody>,
+  tr: ({ children }) => <tr>{children}</tr>,
+  th: ({ children }) => <th style={styles.th}>{children}</th>,
+  td: ({ children }) => <td style={styles.td}>{children}</td>,
 }
 
 /**
@@ -723,13 +723,13 @@ function useHashScroll(content: string): void {
     // Defer so react-markdown has flushed the heading IDs into the DOM.
     const handle = window.setTimeout(() => {
       const target = document.getElementById(hash)
-      if (target) target.scrollIntoView({block: 'start', inline: 'nearest'})
+      if (target) target.scrollIntoView({ block: 'start', inline: 'nearest' })
     }, 50)
     return () => window.clearTimeout(handle)
   }, [content])
 }
 
-export function MarkdownRenderer({content}: {content: string}): React.ReactElement {
+export function MarkdownRenderer({ content }: { content: string }): React.ReactElement {
   useHashScroll(content)
   return (
     <div className="help-md">

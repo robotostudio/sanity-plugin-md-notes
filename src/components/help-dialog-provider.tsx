@@ -1,11 +1,11 @@
-import {Dialog} from '@sanity/ui'
-import {type ReactElement, type ReactNode, useEffect, useState} from 'react'
+import { Dialog } from '@sanity/ui'
+import { type ReactElement, type ReactNode, useEffect, useState } from 'react'
 
-import {getHelp} from '../registry'
-import {closeHelpDialog, subscribeHelpDialog} from './help-dialog-store'
-import {HelpPanel, HelpPanelEmpty} from './help-panel'
+import { getHelp } from '../registry'
+import { closeHelpDialog, subscribeHelpDialog } from './help-dialog-store'
+import { HelpPanel, HelpPanelEmpty } from './help-panel'
 
-export function HelpDialogProvider({children}: {children: ReactNode}): ReactElement {
+export function HelpDialogProvider({ children }: { children: ReactNode }): ReactElement {
   const [schemaType, setSchemaType] = useState<string | null>(null)
 
   useEffect(() => subscribeHelpDialog(setSchemaType), [])
@@ -24,7 +24,7 @@ export function HelpDialogProvider({children}: {children: ReactNode}): ReactElem
           width={1}
           padding={0}
         >
-          <div style={{height: '70vh'}}>
+          <div style={{ height: '70vh' }}>
             {entry ? <HelpPanel entry={entry} /> : <HelpPanelEmpty schemaType={schemaType} />}
           </div>
         </Dialog>

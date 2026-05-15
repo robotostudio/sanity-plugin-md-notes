@@ -15,7 +15,7 @@
  * Turbopack that don't support Webpack's `require.context` or Vite's
  * `import.meta.glob`.
  */
-import {generateHelpFiles, type GenerateHelpFilesOptions} from './codegen.js'
+import { generateHelpFiles, type GenerateHelpFilesOptions } from './codegen.js'
 
 interface CodegenCliOptions extends GenerateHelpFilesOptions {
   watch: boolean
@@ -45,7 +45,7 @@ function printHelp(): void {
 }
 
 function parseCodegenArgs(argv: string[]): CodegenCliOptions | 'help' {
-  const opts: CodegenCliOptions = {watch: false}
+  const opts: CodegenCliOptions = { watch: false }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--help' || arg === '-h') return 'help'

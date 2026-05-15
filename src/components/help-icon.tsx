@@ -1,5 +1,5 @@
-import {BookIcon} from '@sanity/icons'
-import type {ReactElement} from 'react'
+import { BookIcon } from '@sanity/icons'
+import type { ReactElement } from 'react'
 
 /**
  * Default Help icon. Re-exported as a named component so consumers can

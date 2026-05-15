@@ -1,4 +1,4 @@
-import {hasHelp} from '../registry'
+import { hasHelp } from '../registry'
 
 /**
  * Schema types that have opted into the help system via `withHelp()`.
@@ -22,7 +22,7 @@ const helpEnabledSchemas = new Set<string>()
  * "Help" menu item, and the singleton Help view all light up as soon as a
  * `<schemaName>.help.md` file is present in the consumer's file map.
  */
-export function withHelp<T extends {name: string}>(schema: T): T {
+export function withHelp<T extends { name: string }>(schema: T): T {
   helpEnabledSchemas.add(schema.name)
   return schema
 }

@@ -1,10 +1,10 @@
-import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs'
-import {tmpdir} from 'node:os'
-import {join} from 'node:path'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
-import {afterEach, beforeEach, describe, expect, test} from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
-import {sanityHelpVite} from './vite'
+import { sanityHelpVite } from './vite'
 
 let workDir: string
 
@@ -13,12 +13,12 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  rmSync(workDir, {recursive: true, force: true})
+  rmSync(workDir, { recursive: true, force: true })
 })
 
 function writeGitConfig(remoteUrl: string): void {
   const gitDir = join(workDir, '.git')
-  mkdirSync(gitDir, {recursive: true})
+  mkdirSync(gitDir, { recursive: true })
   writeFileSync(
     join(gitDir, 'config'),
     `[core]\n\trepositoryformatversion = 0\n[remote "origin"]\n\turl = ${remoteUrl}\n\tfetch = +refs/heads/*:refs/remotes/origin/*\n`,
@@ -47,7 +47,7 @@ describe('sanityHelpVite()', () => {
   })
 
   test('load returns the override repo when one is configured', () => {
-    const plugin = sanityHelpVite({override: 'org/repo'})
+    const plugin = sanityHelpVite({ override: 'org/repo' })
     plugin.configResolved!()
     const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     const result = plugin.load!(resolved)!
@@ -57,7 +57,7 @@ describe('sanityHelpVite()', () => {
 
   test('detects repo from a real .git/config file (https url)', () => {
     writeGitConfig('https://github.com/foo/bar.git')
-    const plugin = sanityHelpVite({cwd: workDir})
+    const plugin = sanityHelpVite({ cwd: workDir })
     plugin.configResolved!()
     const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toContain('"foo/bar"')
@@ -65,7 +65,7 @@ describe('sanityHelpVite()', () => {
 
   test('detects repo from a real .git/config file (ssh url)', () => {
     writeGitConfig('git@github.com:foo/bar.git')
-    const plugin = sanityHelpVite({cwd: workDir})
+    const plugin = sanityHelpVite({ cwd: workDir })
     plugin.configResolved!()
     const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toContain('"foo/bar"')
@@ -74,9 +74,9 @@ describe('sanityHelpVite()', () => {
   test('walks up to find .git/ in a parent dir (monorepo case)', () => {
     writeGitConfig('https://github.com/foo/bar.git')
     const nested = join(workDir, 'apps', 'studio')
-    mkdirSync(nested, {recursive: true})
+    mkdirSync(nested, { recursive: true })
 
-    const plugin = sanityHelpVite({cwd: nested})
+    const plugin = sanityHelpVite({ cwd: nested })
     plugin.configResolved!()
     const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toContain('"foo/bar"')
@@ -84,7 +84,7 @@ describe('sanityHelpVite()', () => {
 
   test('emits null when no .git/ exists in any ancestor dir', () => {
     // No writeGitConfig — empty workDir
-    const plugin = sanityHelpVite({cwd: workDir})
+    const plugin = sanityHelpVite({ cwd: workDir })
     plugin.configResolved!()
     const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toBe('export default null;\n')
@@ -92,7 +92,7 @@ describe('sanityHelpVite()', () => {
 
   test('emits null when origin URL is non-GitHub', () => {
     writeGitConfig('https://gitlab.com/foo/bar.git')
-    const plugin = sanityHelpVite({cwd: workDir})
+    const plugin = sanityHelpVite({ cwd: workDir })
     plugin.configResolved!()
     const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toBe('export default null;\n')
@@ -101,7 +101,7 @@ describe('sanityHelpVite()', () => {
   test('handles the .git file pointer used by worktrees/submodules', () => {
     // Real `.git/` lives at workDir/.git-real
     const realGitDir = join(workDir, '.git-real')
-    mkdirSync(realGitDir, {recursive: true})
+    mkdirSync(realGitDir, { recursive: true })
     writeFileSync(
       join(realGitDir, 'config'),
       `[remote "origin"]\n\turl = https://github.com/foo/bar.git\n`,
@@ -110,7 +110,7 @@ describe('sanityHelpVite()', () => {
     // Worktree-style `.git` is a file containing `gitdir: <path>`
     writeFileSync(join(workDir, '.git'), `gitdir: ${realGitDir}\n`, 'utf8')
 
-    const plugin = sanityHelpVite({cwd: workDir})
+    const plugin = sanityHelpVite({ cwd: workDir })
     plugin.configResolved!()
     const resolved = plugin.resolveId!('sanity-plugin-md-notes/git-repo')!
     expect(plugin.load!(resolved)).toContain('"foo/bar"')

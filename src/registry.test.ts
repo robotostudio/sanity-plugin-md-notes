@@ -1,6 +1,6 @@
-import {beforeEach, describe, expect, test} from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
-import {getEditUrl, getHelp, hasHelp, initHelpRegistry} from './registry'
+import { getEditUrl, getHelp, hasHelp, initHelpRegistry } from './registry'
 
 const mdWithFrontmatter = `---
 lastUpdated: 2026-05-13
@@ -30,7 +30,7 @@ tags: foo
 
 describe('initHelpRegistry', () => {
   beforeEach(() => {
-    initHelpRegistry({files: {}})
+    initHelpRegistry({ files: {} })
   })
 
   test('extracts schema name from path basename', () => {
@@ -85,9 +85,9 @@ describe('initHelpRegistry', () => {
   })
 
   test('re-init wipes previous entries', () => {
-    initHelpRegistry({files: {'./schemas/page.help.md': mdWithFrontmatter}})
+    initHelpRegistry({ files: { './schemas/page.help.md': mdWithFrontmatter } })
     expect(hasHelp('page')).toBe(true)
-    initHelpRegistry({files: {'./schemas/post.help.md': mdWithFrontmatter}})
+    initHelpRegistry({ files: { './schemas/post.help.md': mdWithFrontmatter } })
     expect(hasHelp('page')).toBe(false)
     expect(hasHelp('post')).toBe(true)
   })
@@ -95,7 +95,7 @@ describe('initHelpRegistry', () => {
 
 describe('frontmatter parsing (via initHelpRegistry)', () => {
   test('extracts lastUpdated and strips frontmatter from body', () => {
-    initHelpRegistry({files: {'./schemas/page.help.md': mdWithFrontmatter}})
+    initHelpRegistry({ files: { './schemas/page.help.md': mdWithFrontmatter } })
     const entry = getHelp('page')
     expect(entry?.lastUpdated).toBe('2026-05-13')
     // Note the leading newline: the frontmatter regex consumes up to and
@@ -105,25 +105,25 @@ describe('frontmatter parsing (via initHelpRegistry)', () => {
   })
 
   test('returns null lastUpdated when frontmatter is missing', () => {
-    initHelpRegistry({files: {'./schemas/page.help.md': mdWithoutFrontmatter}})
+    initHelpRegistry({ files: { './schemas/page.help.md': mdWithoutFrontmatter } })
     const entry = getHelp('page')
     expect(entry?.lastUpdated).toBeNull()
     expect(entry?.content).toBe(mdWithoutFrontmatter)
   })
 
   test('strips quotes around lastUpdated value', () => {
-    initHelpRegistry({files: {'./schemas/page.help.md': mdWithQuotedDate}})
+    initHelpRegistry({ files: { './schemas/page.help.md': mdWithQuotedDate } })
     expect(getHelp('page')?.lastUpdated).toBe('2026-05-13')
   })
 
   test('extracts lastUpdated when surrounded by other frontmatter fields', () => {
-    initHelpRegistry({files: {'./schemas/page.help.md': mdWithExtraFrontmatter}})
+    initHelpRegistry({ files: { './schemas/page.help.md': mdWithExtraFrontmatter } })
     expect(getHelp('page')?.lastUpdated).toBe('2026-05-13')
   })
 
   test('CRLF line endings work', () => {
     const crlf = mdWithFrontmatter.replace(/\n/g, '\r\n')
-    initHelpRegistry({files: {'./schemas/page.help.md': crlf}})
+    initHelpRegistry({ files: { './schemas/page.help.md': crlf } })
     expect(getHelp('page')?.lastUpdated).toBe('2026-05-13')
   })
 })
@@ -131,7 +131,7 @@ describe('frontmatter parsing (via initHelpRegistry)', () => {
 describe('getEditUrl', () => {
   test('builds GitHub blob URL from owner/repo + default branch', () => {
     initHelpRegistry({
-      files: {'./schemas/page.help.md': mdWithFrontmatter},
+      files: { './schemas/page.help.md': mdWithFrontmatter },
       githubRepo: 'org/repo',
     })
     const entry = getHelp('page')!
@@ -140,7 +140,7 @@ describe('getEditUrl', () => {
 
   test('respects custom branch', () => {
     initHelpRegistry({
-      files: {'./schemas/page.help.md': mdWithFrontmatter},
+      files: { './schemas/page.help.md': mdWithFrontmatter },
       githubRepo: 'org/repo',
       branch: 'next',
     })
@@ -151,7 +151,7 @@ describe('getEditUrl', () => {
 
   test('strips configured basePath from source path', () => {
     initHelpRegistry({
-      files: {'apps/studio/schemas/page.help.md': mdWithFrontmatter},
+      files: { 'apps/studio/schemas/page.help.md': mdWithFrontmatter },
       githubRepo: 'org/repo',
       basePath: 'apps/studio/',
     })
@@ -162,8 +162,8 @@ describe('getEditUrl', () => {
 
   test('accepts pkg.repository object as githubRepo', () => {
     initHelpRegistry({
-      files: {'./schemas/page.help.md': mdWithFrontmatter},
-      githubRepo: {type: 'git', url: 'git+https://github.com/org/repo.git'},
+      files: { './schemas/page.help.md': mdWithFrontmatter },
+      githubRepo: { type: 'git', url: 'git+https://github.com/org/repo.git' },
     })
     expect(getEditUrl(getHelp('page')!)).toBe(
       'https://github.com/org/repo/blob/main/schemas/page.help.md',
@@ -171,13 +171,13 @@ describe('getEditUrl', () => {
   })
 
   test('returns null when no githubRepo configured', () => {
-    initHelpRegistry({files: {'./schemas/page.help.md': mdWithFrontmatter}})
+    initHelpRegistry({ files: { './schemas/page.help.md': mdWithFrontmatter } })
     expect(getEditUrl(getHelp('page')!)).toBeNull()
   })
 
   test('returns null when githubRepo is unparseable', () => {
     initHelpRegistry({
-      files: {'./schemas/page.help.md': mdWithFrontmatter},
+      files: { './schemas/page.help.md': mdWithFrontmatter },
       githubRepo: 'https://gitlab.com/org/repo',
     })
     expect(getEditUrl(getHelp('page')!)).toBeNull()

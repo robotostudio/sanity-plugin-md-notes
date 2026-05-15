@@ -17,8 +17,8 @@
  *       outputFile: 'sanity/help-files.ts',
  *     })
  */
-import {existsSync, mkdirSync, readdirSync, writeFileSync} from 'node:fs'
-import {dirname, join, relative, resolve} from 'node:path'
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
+import { dirname, join, relative, resolve } from 'node:path'
 
 export interface GenerateHelpFilesOptions {
   /**
@@ -91,14 +91,14 @@ export function generateHelpFiles(options: GenerateHelpFilesOptions = {}): Gener
     `}`,
   ].join('\n')}\n`
 
-  mkdirSync(outputDir, {recursive: true})
+  mkdirSync(outputDir, { recursive: true })
   writeFileSync(outputFileAbs, content, 'utf8')
 
-  return {filesWritten: helpFiles.length, helpFiles, outputFileAbs}
+  return { filesWritten: helpFiles.length, helpFiles, outputFileAbs }
 }
 
 function collectHelpFiles(dir: string, results: string[]): void {
-  for (const entry of readdirSync(dir, {withFileTypes: true})) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue
     const full = join(dir, entry.name)
     if (entry.isDirectory()) collectHelpFiles(full, results)
