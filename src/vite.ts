@@ -47,20 +47,28 @@ export interface SanityHelpViteOptions {
   override?: string | {url?: string} | null
 }
 
+// EACCES, transient FS errors, malformed worktree state — return null so
+// `findGitDir` keeps walking rather than crashing plugin init.
+function resolveGitCandidate(candidate: string, dir: string): string | null {
+  try {
+    if (!existsSync(candidate)) return null
+    const stat = statSync(candidate)
+    if (stat.isDirectory()) return candidate
+    if (!stat.isFile()) return null
+    // `.git` file in worktrees/submodules — contains `gitdir: <path>`
+    const content = readFileSync(candidate, 'utf8').trim()
+    const match = content.match(/^gitdir:\s*(.+)$/m)
+    return match && match[1] ? resolve(dir, match[1]) : null
+  } catch {
+    return null
+  }
+}
+
 function findGitDir(startDir: string): string | null {
   let dir = resolve(startDir)
   for (let i = 0; i < 50; i++) {
-    const candidate = join(dir, '.git')
-    if (existsSync(candidate)) {
-      const stat = statSync(candidate)
-      if (stat.isDirectory()) return candidate
-      if (stat.isFile()) {
-        // `.git` file in worktrees/submodules — contains `gitdir: <path>`
-        const content = readFileSync(candidate, 'utf8').trim()
-        const match = content.match(/^gitdir:\s*(.+)$/m)
-        if (match && match[1]) return resolve(dir, match[1])
-      }
-    }
+    const resolved = resolveGitCandidate(join(dir, '.git'), dir)
+    if (resolved) return resolved
     const parent = dirname(dir)
     if (parent === dir) return null
     dir = parent
@@ -71,7 +79,12 @@ function findGitDir(startDir: string): string | null {
 function readOriginUrl(gitDir: string): string | null {
   const configPath = join(gitDir, 'config')
   if (!existsSync(configPath)) return null
-  const cfg = readFileSync(configPath, 'utf8')
+  let cfg: string
+  try {
+    cfg = readFileSync(configPath, 'utf8')
+  } catch {
+    return null
+  }
   // Naive INI scan — find [remote "origin"] section and its `url` entry.
   // Sections are delimited by the next `[...]` header.
   const sectionMatch = cfg.match(/\[remote\s+"origin"\]([\s\S]*?)(?=\n\[|$)/i)
