@@ -18,7 +18,7 @@
  *     })
  */
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
-import { dirname, join, relative, resolve } from 'node:path'
+import { basename, dirname, join, relative, resolve } from 'node:path'
 
 export interface GenerateHelpFilesOptions {
   /**
@@ -74,9 +74,9 @@ export function generateHelpFiles(options: GenerateHelpFilesOptions = {}): Gener
     const relPath = relative(outputDir, file).replace(/\\/g, '/')
     const importPath = relPath.startsWith('.') ? relPath : `./${relPath}`
     const varName = `help${index}`
-    const basename = file.split(/[\\/]/).pop() ?? ''
+    const name = basename(file)
     importLines.push(`import ${varName} from '${importPath}'`)
-    entryLines.push(`  '${basename}': ${varName},`)
+    entryLines.push(`  '${name}': ${varName},`)
   })
 
   const content = `${[
