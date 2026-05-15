@@ -118,7 +118,7 @@ export default defineConfig({
 > **`githubRepo` is optional.** It only drives the "Edit on GitHub" footer
 > link. The example uses [`sanity-plugin-md-notes/git-repo`](#auto-detect-github-repo-vite-plugin)
 > for auto-detection; alternatively pass `'owner/repo'` literally or your
-> `package.json` `repository` field. See [Configuration](#helpplugin-config-options)
+> `package.json` `repository` field. See [Configuration](#helppluginconfig-options)
 > for all accepted shapes.
 
 ### Next.js / Turbopack / Webpack (Studio mounted in a Next.js app)
@@ -226,7 +226,9 @@ export default withHelp(
   defineType({
     name: 'page',
     type: 'document',
-    fields: [/* ... */],
+    fields: [
+      /* ... */
+    ],
   }),
 )
 ```
@@ -340,9 +342,7 @@ export const structure: StructureResolver = (S, context) =>
     .title('Content')
     .items([
       S.documentTypeListItem('page').child(
-        S.documentTypeList('page').menuItems(
-          helpMenuItems(S, {schemaType: 'page', context}),
-        ),
+        S.documentTypeList('page').menuItems(helpMenuItems(S, {schemaType: 'page', context})),
       ),
     ])
 ```
@@ -353,7 +353,13 @@ omit `context` and spread:
 ```ts
 S.documentTypeList('page').menuItems([
   ...helpMenuItems(S, {schemaType: 'page'}),
-  S.orderingMenuItem({name: 'recent', title: 'Recent', by: [/* ... */]}),
+  S.orderingMenuItem({
+    name: 'recent',
+    title: 'Recent',
+    by: [
+      /* ... */
+    ],
+  }),
 ])
 ```
 
@@ -365,8 +371,8 @@ S.documentTypeList('page').menuItems([
 
 Only one field is recognised:
 
-| Field         | Description                                                                                    |
-| ------------- | ---------------------------------------------------------------------------------------------- |
+| Field         | Description                                                                                   |
+| ------------- | --------------------------------------------------------------------------------------------- |
 | `lastUpdated` | ISO date string shown in the footer. Quoting is optional. Leave it out to hide the timestamp. |
 
 ```md
@@ -454,12 +460,12 @@ Paste a Loom, YouTube, Vimeo, or Wistia URL **on its own line** and the
 plugin renders an inline 16:9 iframe. Explicit `[click here](https://...)`
 syntax keeps acting as a regular link.
 
-| Provider | Supported URL shapes                                                                                                |
-| -------- | -------------------------------------------------------------------------------------------------------------------- |
-| Loom     | `loom.com/share/<id>`, `loom.com/embed/<id>`                                                                         |
-| YouTube  | `youtube.com/watch?v=<id>`, `youtu.be/<id>`, `youtube.com/embed/<id>`, `youtube.com/shorts/<id>`                     |
-| Vimeo    | `vimeo.com/<id>`, `player.vimeo.com/video/<id>`                                                                      |
-| Wistia   | `*.wistia.com/medias/<id>`, `*.wistia.net/medias/<id>`, `fast.wistia.net/embed/iframe/<id>`                          |
+| Provider | Supported URL shapes                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------ |
+| Loom     | `loom.com/share/<id>`, `loom.com/embed/<id>`                                                     |
+| YouTube  | `youtube.com/watch?v=<id>`, `youtu.be/<id>`, `youtube.com/embed/<id>`, `youtube.com/shorts/<id>` |
+| Vimeo    | `vimeo.com/<id>`, `player.vimeo.com/video/<id>`                                                  |
+| Wistia   | `*.wistia.com/medias/<id>`, `*.wistia.net/medias/<id>`, `fast.wistia.net/embed/iframe/<id>`      |
 
 > [!NOTE]
 > YouTube embeds use `youtube-nocookie.com` and `referrerPolicy="origin"`
@@ -510,12 +516,12 @@ helpPlugin({
 })
 ```
 
-| Option       | Type                                                                          | Default                | Description                                                                                                                |
-| ------------ | ----------------------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `files`      | `Record<string, string>`                                                      | required               | Map of file path → raw markdown. The basename (minus `.help.md`) must equal the schema `name:` you're attaching help to. |
-| `githubRepo` | `string \| {url?: string}`                                                    | _(footer hidden)_      | Drives the "Edit on GitHub" footer link. Accepts `'owner/repo'`, any GitHub URL form, `github:owner/repo`, or the shape of `pkg.repository` directly. |
-| `branch`     | `string`                                                                      | `'main'`               | Branch the GitHub link points at.                                                                                          |
-| `basePath`   | `string`                                                                      | _(strips `./` / `../`)_ | Prefix to strip from each file key when building the GitHub URL.                                                          |
+| Option       | Type                       | Default                 | Description                                                                                                                                           |
+| ------------ | -------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `files`      | `Record<string, string>`   | required                | Map of file path → raw markdown. The basename (minus `.help.md`) must equal the schema `name:` you're attaching help to.                              |
+| `githubRepo` | `string \| {url?: string}` | _(footer hidden)_       | Drives the "Edit on GitHub" footer link. Accepts `'owner/repo'`, any GitHub URL form, `github:owner/repo`, or the shape of `pkg.repository` directly. |
+| `branch`     | `string`                   | `'main'`                | Branch the GitHub link points at.                                                                                                                     |
+| `basePath`   | `string`                   | _(strips `./` / `../`)_ | Prefix to strip from each file key when building the GitHub URL.                                                                                      |
 
 ### Auto-detect GitHub repo (Vite plugin)
 
@@ -604,16 +610,16 @@ These exports let you reuse the plugin's pieces in custom UIs — for
 example, rendering help content in a custom inspector, or building your
 own list-pane action.
 
-| Export                | Description                                                                                                |
-| --------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `HelpIcon`            | The default Help icon (`BookIcon` from `@sanity/icons`, wrapped). Re-export to swap globally.             |
-| `HelpPanel`           | Full panel: rendered markdown + footer. Pass a `HelpEntry` from `getHelp()`.                              |
-| `HelpPanelEmpty`      | The empty-state component shown when a schema is opted in but has no `.help.md` file yet.                  |
-| `MarkdownRenderer`    | Just the markdown body, no footer. Useful when embedding the same content in another tool.                |
-| `getHelp(schemaType)` | Look up a `HelpEntry` from the registry. Returns `undefined` if no help is registered for the type.       |
-| `hasHelp(type)`       | Boolean: is there a `.help.md` registered for `type`?                                                     |
-| `isHelpEnabled(type)` | Boolean: was the schema wrapped with `withHelp()`?                                                        |
-| `isHelpActive(type)`  | `hasHelp(type) && isHelpEnabled(type)`. The "is help genuinely available right now?" check.               |
+| Export                | Description                                                                                         |
+| --------------------- | --------------------------------------------------------------------------------------------------- |
+| `HelpIcon`            | The default Help icon (`BookIcon` from `@sanity/icons`, wrapped). Re-export to swap globally.       |
+| `HelpPanel`           | Full panel: rendered markdown + footer. Pass a `HelpEntry` from `getHelp()`.                        |
+| `HelpPanelEmpty`      | The empty-state component shown when a schema is opted in but has no `.help.md` file yet.           |
+| `MarkdownRenderer`    | Just the markdown body, no footer. Useful when embedding the same content in another tool.          |
+| `getHelp(schemaType)` | Look up a `HelpEntry` from the registry. Returns `undefined` if no help is registered for the type. |
+| `hasHelp(type)`       | Boolean: is there a `.help.md` registered for `type`?                                               |
+| `isHelpEnabled(type)` | Boolean: was the schema wrapped with `withHelp()`?                                                  |
+| `isHelpActive(type)`  | `hasHelp(type) && isHelpEnabled(type)`. The "is help genuinely available right now?" check.         |
 
 ```ts
 import {getHelp, MarkdownRenderer} from 'sanity-plugin-md-notes'
