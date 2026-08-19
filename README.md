@@ -99,7 +99,7 @@ export default defineConfig({
 > **TypeScript note.** If `import.meta.glob` errors with
 > `Property 'glob' does not exist on type 'ImportMeta'`, your tsconfig
 > doesn't include Vite's ambient types. Most Sanity studios scaffold with
-> them already; if yours doesn't (we hit this with slingshot), add
+> them already; if yours doesn't (we hit this on a client studio), add
 > `"vite/client"` to `compilerOptions.types`:
 >
 > ```json
